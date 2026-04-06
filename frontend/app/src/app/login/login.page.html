@@ -1,0 +1,26 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Drivora</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <div class="login-container">
+    <h2>Hoş Geldiniz</h2>
+    <p>Hesabınıza giriş yapın</p>
+
+    <ion-item>
+      <ion-label position="floating">Email</ion-label>
+      <ion-input type="email" [(ngModel)]="email"></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="floating">Şifre</ion-label>
+      <ion-input type="password" [(ngModel)]="sifre"></ion-input>
+    </ion-item>
+
+    <ion-button expand="block" (click)="girisYap()" class="ion-margin-top">
+      Giriş Yap
+    </ion-button>
+  </div>
+</ion-content>
