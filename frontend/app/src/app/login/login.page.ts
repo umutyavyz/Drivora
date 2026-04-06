@@ -3,6 +3,10 @@ import { IonicModule } from '@ionic/angular';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
+import { addIcons } from 'ionicons';
+import { logoGoogle, logoApple } from 'ionicons/icons';
+
+addIcons({ logoGoogle, logoApple });
 
 @Component({
   selector: 'app-login',

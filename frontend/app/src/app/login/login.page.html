@@ -1,26 +1,55 @@
-<ion-header>
-  <ion-toolbar color="primary">
-    <ion-title>Drivora</ion-title>
-  </ion-toolbar>
-</ion-header>
+<ion-content>
+  <div class="login-wrapper">
 
-<ion-content class="ion-padding">
-  <div class="login-container">
-    <h2>Hoş Geldiniz</h2>
-    <p>Hesabınıza giriş yapın</p>
+    <div class="hero-section">
+      <img src="assets/car.jpg" alt="Car" class="hero-image"/>
+      <div class="hero-gradient"></div>
+      <div class="hero-overlay">
+        <h1>Mükemmelliği<br>Deneyimle.</h1>
+        <p>Seçkin sürücüler için özenle seçilmiş yüksek performanslı araçlar.</p>
+      </div>
+    </div>
 
-    <ion-item>
-      <ion-label position="floating">Email</ion-label>
-      <ion-input type="email" [(ngModel)]="email"></ion-input>
-    </ion-item>
+    <div class="form-section">
+      <div class="brand">
+        <span class="brand-name">Drivora</span>
+        <h2>Hoş Geldiniz</h2>
+      </div>
 
-    <ion-item>
-      <ion-label position="floating">Şifre</ion-label>
-      <ion-input type="password" [(ngModel)]="sifre"></ion-input>
-    </ion-item>
+      <div class="input-group">
+        <label>E-POSTA ADRESİ</label>
+        <div class="input-wrapper">
+          <input type="email" [(ngModel)]="email" placeholder="umut@drivora.com"/>
+        </div>
+      </div>
 
-    <ion-button expand="block" (click)="girisYap()" class="ion-margin-top">
-      Giriş Yap
-    </ion-button>
+      <div class="input-group">
+        <label>PAROLA <span class="forgot">UNUTTUNUZ MU?</span></label>
+        <div class="input-wrapper">
+          <input type="password" [(ngModel)]="sifre" placeholder="••••••••"/>
+        </div>
+      </div>
+
+      <button class="login-btn" (click)="girisYap()">
+        <span>Giriş Yap</span>
+        <span class="btn-arrow">→</span>
+      </button>
+
+      <p class="register-text">
+        Hesabınız yok mu? <span class="register-link">Hesap Oluştur</span>
+      </p>
+
+      <div class="divider">
+        <span class="divider-line"></span>
+        <span class="divider-text">veya</span>
+        <span class="divider-line"></span>
+      </div>
+
+      <div class="social-row">
+        <button class="social-btn"><ion-icon name="logo-google"></ion-icon> Google</button>
+        <button class="social-btn"><ion-icon name="logo-apple"></ion-icon> Apple</button>
+      </div>
+    </div>
+
   </div>
 </ion-content>
