@@ -19,3 +19,15 @@ export const tokenKontrol = (req: Request, res: Response, next: NextFunction) =>
     return res.status(401).json({ hata: "Geçersiz token" });
   }
 };
+
+export const adminKontrol = (req: Request, res: Response, next:NextFunction) => {
+  const kullanici = (req as any).kullanici;
+
+  if (!kullanici){
+    return res.status(401).json({hata:"Token Gerekli"});
+  }
+  if (kullanici.rol !== "admin"){
+    return res.status(403).json({hata:"Bu işlem için admin yetkisi gerekli"});
+  }
+  next();
+};

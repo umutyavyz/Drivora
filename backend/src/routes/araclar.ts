@@ -1,12 +1,12 @@
 import { Router } from "express";
 import { araclarListele, aracEkle, aracGuncelle, aracSil } from "../controllers/araclarController";
-import { tokenKontrol } from "../middleware/authMiddleware";
+import { tokenKontrol,adminKontrol } from "../middleware/authMiddleware";
 
 const router = Router();
 
 router.get("/", tokenKontrol, araclarListele);
-router.post("/", tokenKontrol, aracEkle);
-router.put("/:id", tokenKontrol, aracGuncelle);
-router.delete("/:id", tokenKontrol, aracSil);
+router.post("/", tokenKontrol,adminKontrol, aracEkle);
+router.put("/:id", tokenKontrol,adminKontrol,aracGuncelle);
+router.delete("/:id", tokenKontrol,adminKontrol, aracSil);
 
 export default router;
