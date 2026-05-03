@@ -1,13 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import {
-  IonHeader, IonToolbar, IonTitle, IonContent,
-  IonList, IonItem, IonLabel, IonIcon,
-  IonAvatar, IonButton
-} from '@ionic/angular/standalone';
+import { IonContent, IonIcon } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { mailOutline, shieldOutline } from 'ionicons/icons';
+import {
+  mailOutline, shieldOutline, timeOutline,
+  logOutOutline, person, shieldCheckmark
+} from 'ionicons/icons';
 import { jwtDecode } from 'jwt-decode';
 
 @Component({
@@ -15,19 +14,17 @@ import { jwtDecode } from 'jwt-decode';
   templateUrl: 'tab3.page.html',
   styleUrls: ['tab3.page.scss'],
   standalone: true,
-  imports: [
-    CommonModule,
-    IonHeader, IonToolbar, IonTitle, IonContent,
-    IonList, IonItem, IonLabel, IonIcon,
-    IonAvatar, IonButton
-  ],
+  imports: [CommonModule, IonContent, IonIcon],
 })
 export class Tab3Page implements OnInit {
   email = '';
   rol = '';
 
   constructor(private router: Router) {
-    addIcons({ mailOutline, shieldOutline });
+    addIcons({
+      mailOutline, shieldOutline, timeOutline,
+      logOutOutline, person, shieldCheckmark
+    });
   }
 
   ngOnInit() {

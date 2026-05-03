@@ -1,36 +1,60 @@
-<ion-header>
-  <ion-toolbar color="primary">
-    <ion-title>Profil</ion-title>
-  </ion-toolbar>
-</ion-header>
+<ion-content [fullscreen]="true">
+  <div class="page-container">
 
-<ion-content class="ion-padding">
-  <div style="text-align: center; padding: 40px 0;">
-    <ion-avatar style="width: 80px; height: 80px; margin: 0 auto 16px;">
-      <img src="https://ionicframework.com/docs/img/demos/avatar.svg" />
-    </ion-avatar>
-    <h2>{{ email }}</h2>
-    <p>{{ rol }}</p>
+    <div class="header">
+      <p class="greeting">Hesabın</p>
+      <h1>Profil</h1>
+    </div>
+
+    <div class="profile-card">
+      <div class="avatar-wrapper">
+        <div class="avatar">
+          <ion-icon name="person" class="avatar-icon"></ion-icon>
+        </div>
+        <div class="badge" *ngIf="rol === 'admin'">
+          <ion-icon name="shield-checkmark"></ion-icon>
+        </div>
+      </div>
+      <h2>{{ email }}</h2>
+      <p class="role-tag">{{ rol === 'admin' ? 'Yönetici' : 'Üye' }}</p>
+    </div>
+
+    <div class="info-list">
+      <div class="info-item">
+        <div class="info-icon">
+          <ion-icon name="mail-outline"></ion-icon>
+        </div>
+        <div class="info-content">
+          <p class="info-label">E-posta</p>
+          <p class="info-value">{{ email }}</p>
+        </div>
+      </div>
+
+      <div class="info-item">
+        <div class="info-icon">
+          <ion-icon name="shield-outline"></ion-icon>
+        </div>
+        <div class="info-content">
+          <p class="info-label">Hesap Tipi</p>
+          <p class="info-value">{{ rol === 'admin' ? 'Yönetici' : 'Standart Üye' }}</p>
+        </div>
+      </div>
+
+      <div class="info-item">
+        <div class="info-icon">
+          <ion-icon name="time-outline"></ion-icon>
+        </div>
+        <div class="info-content">
+          <p class="info-label">Üyelik</p>
+          <p class="info-value">Aktif</p>
+        </div>
+      </div>
+    </div>
+
+    <button class="logout-btn" (click)="cikisYap()">
+      <ion-icon name="log-out-outline"></ion-icon>
+      Çıkış Yap
+    </button>
+
   </div>
-
-  <ion-list>
-    <ion-item>
-      <ion-icon name="mail-outline" slot="start"></ion-icon>
-      <ion-label>
-        <p>E-posta</p>
-        <h3>{{ email }}</h3>
-      </ion-label>
-    </ion-item>
-    <ion-item>
-      <ion-icon name="shield-outline" slot="start"></ion-icon>
-      <ion-label>
-        <p>Rol</p>
-        <h3>{{ rol }}</h3>
-      </ion-label>
-    </ion-item>
-  </ion-list>
-
-  <ion-button expand="block" color="danger" (click)="cikisYap()" class="ion-margin-top">
-    Çıkış Yap
-  </ion-button>
 </ion-content>

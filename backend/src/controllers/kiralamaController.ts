@@ -54,3 +54,35 @@ export const kiralamaListele = async (req: Request, res: Response) => {
     res.status(500).json({ hata: err.message });
   }
 };
+
+export const kiralamaBitir = async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id;
+    const kullanici_id = (req as any).kullanici.userId;
+
+    const kiralamaKontrol = await pool.query(
+      "SELECT * FROM kiralamalar WHERE id = $1 AND kullanici_id = $2 AND durum = 'aktif'",
+      [id, kullanici_id]
+    );
+
+    if (kiralamaKontrol.rows.length === 0) {
+      return res.status(404).json({ hata: "Aktif kiralama bulunamadı" });
+    }
+
+    const kiralama = kiralamaKontrol.rows[0];
+
+    await pool.query(
+      "UPDATE kiralamalar SET bitis_tarihi = NOW(), durum = 'tamamlandi' WHERE id = $1",
+      [id]
+    );
+
+    await pool.query(
+      "UPDATE araclar SET musait = true WHERE id = $1",
+      [kiralama.arac_id]
+    );
+
+    res.json({ mesaj: "Kiralama bitirildi" });
+  } catch (err: any) {
+    res.status(500).json({ hata: err.message });
+  }
+};
