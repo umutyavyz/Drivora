@@ -1,17 +1,22 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>
-      Tab 2
-    </ion-title>
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Kiralamalarım</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Tab 2</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content>
+  <ion-list *ngIf="kiralamalar.length > 0">
+    <ion-item *ngFor="let kiralama of kiralamalar">
+      <ion-label>
+        <h2>{{ kiralama.marka }} {{ kiralama.model }}</h2>
+        <p>Başlangıç: {{ kiralama.baslangic_tarihi | date:'dd.MM.yyyy HH:mm' }}</p>
+        <p>Durum: {{ kiralama.durum }}</p>
+      </ion-label>
+      <ion-badge slot="end" color="primary">{{ kiralama.durum }}</ion-badge>
+    </ion-item>
+  </ion-list>
 
-  <app-explore-container name="Tab 2 page"></app-explore-container>
+  <div *ngIf="kiralamalar.length === 0" style="text-align:center; padding: 40px;">
+    <p>Henüz kiralamanız bulunmamaktadır.</p>
+  </div>
 </ion-content>

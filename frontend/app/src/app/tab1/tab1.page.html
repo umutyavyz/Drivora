@@ -1,17 +1,23 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>
-      Tab 1
-    </ion-title>
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Araçlar</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Tab 1</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="araclariGetir()">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
 
-  <app-explore-container name="Tab 1 page"></app-explore-container>
+  <ion-list>
+    <ion-item *ngFor="let arac of araclar">
+      <ion-label>
+        <h2>{{ arac.marka }} {{ arac.model }}</h2>
+        <p>{{ arac.musait ? 'Müsait' : 'Müsait Değil' }}</p>
+      </ion-label>
+      <ion-badge slot="end" [color]="arac.musait ? 'success' : 'danger'">
+        {{ arac.musait ? '✓' : '✗' }}
+      </ion-badge>
+    </ion-item>
+  </ion-list>
 </ion-content>
