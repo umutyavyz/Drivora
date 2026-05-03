@@ -18,6 +18,7 @@ addIcons({ logoGoogle, logoApple });
 export class LoginPage {
   email = '';
   sifre = '';
+  
 
   constructor(private http: HttpClient, private router: Router) {}
 
@@ -36,4 +37,7 @@ export class LoginPage {
       }
     });
   }
+  kayitOl() {
+  this.router.navigate(['/register']);
+}
 }

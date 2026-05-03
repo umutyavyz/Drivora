@@ -36,3 +36,27 @@
 /* @import "@ionic/angular/css/palettes/dark.always.css"; */
 /* @import "@ionic/angular/css/palettes/dark.class.css"; */
 @import '@ionic/angular/css/palettes/dark.system.css';
+
+
+ion-tabs ion-router-outlet {
+  contain: layout style;
+}
+
+ion-tabs ion-router-outlet > .ion-page.ion-page-invisible {
+  opacity: 0;
+}
+
+ion-tabs ion-router-outlet > .ion-page {
+  animation: tabSlide 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes tabSlide {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}

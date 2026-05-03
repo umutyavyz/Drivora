@@ -1,0 +1,44 @@
+<ion-content>
+  <div class="register-wrapper">
+    
+    <div class="hero-section">
+      <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=900" alt="Car" class="hero-image"/>
+      <div class="hero-overlay">
+        <h1>Aramıza<br>Katıl.</h1>
+        <p>Premium araçlar seni bekliyor.</p>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <div class="brand">
+        <p>Drivora</p>
+        <h2>Hesap Oluştur</h2>
+      </div>
+
+      <div class="input-group">
+        <label>E-POSTA ADRESİ</label>
+        <input type="email" [(ngModel)]="email" placeholder="ornek@drivora.com"/>
+      </div>
+
+      <div class="input-group">
+        <label>PAROLA</label>
+        <input type="password" [(ngModel)]="sifre" placeholder="••••••••"/>
+      </div>
+
+      <div class="input-group">
+        <label>PAROLA TEKRAR</label>
+        <input type="password" [(ngModel)]="sifreTekrar" placeholder="••••••••"/>
+      </div>
+
+      <button class="register-btn" (click)="kayitOl()">
+        Kayıt Ol →
+      </button>
+
+      <p class="login-text">
+        Hesabın var mı? <span class="login-link" (click)="girisYap()">Giriş Yap</span>
+      </p>
+
+    </div>
+
+  </div>
+</ion-content>
