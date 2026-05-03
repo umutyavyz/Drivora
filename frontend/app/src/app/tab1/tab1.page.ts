@@ -1,11 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { 
-  IonHeader, IonToolbar, IonTitle, IonContent,
-  IonList, IonItem, IonLabel, IonBadge,
-  IonRefresher, IonRefresherContent
-} from '@ionic/angular/standalone';
+import { IonHeader, IonToolbar, IonContent } from '@ionic/angular/standalone';
 
 @Component({
   selector: 'app-tab1',
@@ -13,14 +10,15 @@ import {
   styleUrls: ['tab1.page.scss'],
   standalone: true,
   imports: [
-    CommonModule,
-    IonHeader, IonToolbar, IonTitle, IonContent,
-    IonList, IonItem, IonLabel, IonBadge,
-    IonRefresher, IonRefresherContent
+    CommonModule, FormsModule,
+    IonHeader, IonToolbar, IonContent
   ],
 })
 export class Tab1Page implements OnInit {
   araclar: any[] = [];
+  kategoriler = ['Tümü', 'Spor', 'Sedan', 'Ekonomik'];
+  seciliKategori = 'Tümü';
+  aramaMetni = '';
 
   constructor(private http: HttpClient) {}
 
@@ -40,5 +38,27 @@ export class Tab1Page implements OnInit {
         console.log('Hata:', err);
       }
     });
+  }
+
+  kategoriSec(kategori: string) {
+    this.seciliKategori = kategori;
+  }
+
+  filtrelenmisAraclar() {
+    let sonuc = this.araclar;
+
+    if (this.seciliKategori !== 'Tümü') {
+      sonuc = sonuc.filter(a => a.kategori === this.seciliKategori);
+    }
+
+    if (this.aramaMetni.trim()) {
+      const arama = this.aramaMetni.toLowerCase();
+      sonuc = sonuc.filter(a =>
+        a.marka?.toLowerCase().includes(arama) ||
+        a.model?.toLowerCase().includes(arama)
+      );
+    }
+
+    return sonuc;
   }
 }

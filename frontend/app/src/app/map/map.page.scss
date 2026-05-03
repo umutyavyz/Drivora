@@ -1,0 +1,215 @@
+ion-content {
+  --background: #0a0a0a;
+}
+
+.map-container {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+}
+
+#map {
+  width: 100%;
+  height: 100%;
+  background: #0a0a0a;
+}
+
+.header-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  padding: 60px 16px 16px;
+  pointer-events: none;
+
+  .header-card {
+    background: rgba(22, 22, 22, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    padding: 16px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    pointer-events: auto;
+
+    .user-info {
+      flex: 1;
+
+      .greeting {
+        font-size: 12px;
+        color: rgba(255, 255, 255, 0.5);
+        margin: 0 0 4px 0;
+        letter-spacing: 0.5px;
+      }
+
+      h2 {
+        font-size: 18px;
+        font-weight: 700;
+        color: white;
+        margin: 0;
+      }
+
+      .closest {
+        font-size: 11px;
+        color: #4a9eff;
+        margin: 4px 0 0 0;
+        font-weight: 500;
+      }
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+
+      .filter-btn {
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: white;
+        padding: 10px 14px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+
+        &.active {
+          background: linear-gradient(135deg, #4a9eff, #6c63ff);
+          border-color: transparent;
+        }
+      }
+
+      .locate-btn {
+        width: 44px;
+        height: 44px;
+        background: linear-gradient(135deg, #ffffff, #ffffff);
+        border: none;
+        border-radius: 14px;
+        font-size: 20px;
+        cursor: pointer;
+      }
+    }
+  }
+}
+
+.bottom-sheet {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #161616;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 24px 24px 0 0;
+  padding: 12px 20px 32px;
+  z-index: 1000;
+  animation: slideUp 0.3s ease;
+
+  .sheet-handle {
+    width: 40px;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 2px;
+    margin: 0 auto 16px;
+  }
+
+  .info-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+
+    .brand {
+      font-size: 12px;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.5);
+      margin: 0 0 2px 0;
+      letter-spacing: 1px;
+    }
+
+    h3 {
+      font-size: 22px;
+      font-weight: 700;
+      color: white;
+      margin: 0;
+    }
+
+    .distance {
+      font-size: 12px;
+      color: #4a9eff;
+      margin: 6px 0 0 0;
+      font-weight: 500;
+    }
+
+    .close-btn {
+      width: 32px;
+      height: 32px;
+      background: rgba(255, 255, 255, 0.08);
+      border: none;
+      border-radius: 50%;
+      color: white;
+      font-size: 14px;
+      cursor: pointer;
+    }
+  }
+
+  .info-image {
+    height: 120px;
+    margin: 8px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+  }
+
+  .info-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 12px;
+
+    .price {
+      display: flex;
+      align-items: baseline;
+      gap: 4px;
+
+      .amount {
+        font-size: 24px;
+        font-weight: 700;
+        color: #4a9eff;
+      }
+
+      .period {
+        font-size: 13px;
+        color: rgba(255, 255, 255, 0.5);
+      }
+    }
+
+    .rent-btn {
+      background: linear-gradient(135deg, #4a9eff, #6c63ff);
+      color: white;
+      border: none;
+      padding: 14px 32px;
+      border-radius: 100px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+
+      &:disabled {
+        background: rgba(255, 255, 255, 0.08);
+        color: rgba(255, 255, 255, 0.3);
+      }
+    }
+  }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}

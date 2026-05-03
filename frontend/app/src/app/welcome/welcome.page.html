@@ -1,0 +1,29 @@
+<ion-content [fullscreen]="true">
+  <div class="welcome-container">
+    
+    <div class="hero-section">
+      <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=900" alt="Premium Car" class="hero-image"/>
+      <div class="gradient-overlay"></div>
+    </div>
+
+    <div class="content-section">
+      <div class="brand">
+        <span class="brand-dot"></span>
+        <span class="brand-name">DRIVORA</span>
+      </div>
+
+      <h1>Premium araçlar.<br/>Eşsiz deneyim.</h1>
+      <p>Seçkin sürücüler için özenle seçilmiş yüksek performanslı araçlar. Hayalindeki aracı seç, yola çık.</p>
+
+      <button class="cta-btn" (click)="basla()">
+        Hadi Başlayalım
+        <span class="arrow">→</span>
+      </button>
+
+      <div class="footer-text">
+        <p>Hesabın var mı? <span class="login-link" (click)="girisYap()">Giriş Yap</span></p>
+      </div>
+    </div>
+
+  </div>
+</ion-content>

@@ -1,0 +1,50 @@
+<ion-content [fullscreen]="true">
+  <div class="map-container">
+    <div id="map"></div>
+
+    <div class="header-overlay">
+      <div class="header-card">
+        <div class="user-info">
+          <p class="greeting">Yakındaki Araçlar</p>
+          <h2>{{ yakindakiAraclar.length }} araç bulundu</h2>
+          <p class="closest" *ngIf="enYakinArac">
+            En yakın: {{ enYakinArac.marka }} {{ enYakinArac.model }} • {{ enYakinArac.mesafe }}m
+          </p>
+        </div>
+        <div class="header-actions">
+          
+          <button class="locate-btn" (click)="kullaniciKonumunaGit()">📍</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="bottom-sheet" *ngIf="seciliArac">
+      <div class="sheet-handle"></div>
+      <div class="arac-info">
+        <div class="info-header">
+          <div>
+            <p class="brand">{{ seciliArac.marka }}</p>
+            <h3>{{ seciliArac.model }}</h3>
+            <p class="distance">📍 {{ seciliArac.mesafe }}m uzaklıkta</p>
+          </div>
+          <button class="close-btn" (click)="seciliArac = null">✕</button>
+        </div>
+        <div class="info-image">
+          <img [src]="seciliArac.resim_url" [alt]="seciliArac.marka"/>
+        </div>
+        <div class="info-footer">
+          <div class="price">
+            <span class="amount">₺{{ seciliArac.gunluk_fiyat }}</span>
+            <span class="period">/ gün</span>
+          </div>
+          <button 
+            class="rent-btn" 
+            [disabled]="!seciliArac.musait"
+            (click)="kirala()">
+            {{ seciliArac.musait ? 'Kirala →' : 'Müsait Değil' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</ion-content>

@@ -1,23 +1,65 @@
-<ion-header>
-  <ion-toolbar color="primary">
-    <ion-title>Araçlar</ion-title>
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <div class="header-content">
+      <div class="user-info">
+        <p class="greeting">Merhaba 👋</p>
+        <h2>Konumun</h2>
+        <p class="location">📍 İstanbul, Türkiye</p>
+      </div>
+      <div class="notification-icon">🔔</div>
+    </div>
   </ion-toolbar>
 </ion-header>
 
-<ion-content>
-  <ion-refresher slot="fixed" (ionRefresh)="araclariGetir()">
-    <ion-refresher-content></ion-refresher-content>
-  </ion-refresher>
+<ion-content [fullscreen]="true">
+  
+  <div class="search-bar">
+    <span class="search-icon">🔍</span>
+    <input type="text" placeholder="Araç ara..." [(ngModel)]="aramaMetni"/>
+    <span class="filter-icon">⚙️</span>
+  </div>
 
-  <ion-list>
-    <ion-item *ngFor="let arac of araclar">
-      <ion-label>
-        <h2>{{ arac.marka }} {{ arac.model }}</h2>
-        <p>{{ arac.musait ? 'Müsait' : 'Müsait Değil' }}</p>
-      </ion-label>
-      <ion-badge slot="end" [color]="arac.musait ? 'success' : 'danger'">
-        {{ arac.musait ? '✓' : '✗' }}
-      </ion-badge>
-    </ion-item>
-  </ion-list>
+  <div class="categories">
+    <button 
+      *ngFor="let kategori of kategoriler" 
+      class="category-btn"
+      [class.active]="seciliKategori === kategori"
+      (click)="kategoriSec(kategori)">
+      {{ kategori }}
+    </button>
+  </div>
+
+  <div class="arac-list">
+    <div class="arac-card" *ngFor="let arac of filtrelenmisAraclar()">
+      <div class="card-header">
+        <div class="brand-info">
+          <p class="brand">{{ arac.marka }}</p>
+          <h3 class="model">{{ arac.model }}</h3>
+        </div>
+        <div class="price-info">
+          <span class="amount">₺{{ arac.gunluk_fiyat }}</span>
+          <span class="period">gün</span>
+        </div>
+      </div>
+
+      <div class="card-image">
+        <img [src]="arac.resim_url || 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=600'" [alt]="arac.marka"/>
+      </div>
+
+      <div class="card-footer">
+        <div class="status" [class.musait]="arac.musait" [class.dolu]="!arac.musait">
+          <span class="dot"></span>
+          {{ arac.musait ? 'Müsait' : 'Dolu' }}
+        </div>
+        <button class="detail-btn" [disabled]="!arac.musait">
+          Detay →
+        </button>
+      </div>
+    </div>
+
+    <div class="empty-state" *ngIf="filtrelenmisAraclar().length === 0">
+      <p>Bu kategoride araç bulunamadı.</p>
+    </div>
+  </div>
+
 </ion-content>
