@@ -23,6 +23,10 @@ export const routes: Routes = [
         loadComponent: () => import('../tab3/tab3.page').then((m) => m.Tab3Page),
       },
       {
+        path: 'admin',
+        loadComponent: () => import('../admin/admin.page').then((m) => m.AdminPage),
+      },
+      {
         path: '',
         redirectTo: 'map',
         pathMatch: 'full',

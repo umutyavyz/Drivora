@@ -48,11 +48,27 @@ export class RegisterPage {
       sifre: this.sifre
     }).subscribe({
       next: () => {
-        this.toastGoster('Kayıt başarılı, giriş yapabilirsin', 'success');
-        this.router.navigate(['/login']);
+        this.otomatikGirisYap();
       },
       error: (err) => {
         this.toastGoster(err.error?.hata || 'Kayıt başarısız', 'danger');
+      }
+    });
+  }
+
+  private otomatikGirisYap() {
+    this.http.post<any>('http://localhost:3000/kullanicilar/giris', {
+      email: this.email,
+      sifre: this.sifre
+    }).subscribe({
+      next: (res) => {
+        localStorage.setItem('token', res.token);
+        this.toastGoster('Hoş geldin! 🎉', 'success');
+        this.router.navigate(['/tabs/map'], { replaceUrl: true });
+      },
+      error: () => {
+        this.toastGoster('Kayıt başarılı, lütfen giriş yap', 'warning');
+        this.router.navigate(['/login']);
       }
     });
   }

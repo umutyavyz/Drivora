@@ -1,0 +1,266 @@
+ion-content {
+  --background: var(--app-bg);
+}
+
+.detail-wrapper {
+  padding-bottom: 120px;
+}
+
+.top-bar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--app-overlay);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--drivora-safe-top) 20px 16px;
+
+  .back-btn {
+    width: 44px;
+    height: 44px;
+    background: var(--app-icon-bg);
+    border: 1px solid var(--app-border);
+    border-radius: 14px;
+    color: var(--app-text);
+    font-size: 20px;
+    cursor: pointer;
+  }
+
+  .top-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--app-text);
+  }
+
+  .top-spacer {
+    width: 44px;
+  }
+}
+
+.hero {
+  position: relative;
+  margin: 8px 20px 24px;
+  border-radius: 24px;
+  overflow: hidden;
+  background: var(--app-card-bg);
+  border: 1px solid var(--app-border);
+  height: 240px;
+
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 50% 60%, rgba(74, 158, 255, 0.18), transparent 60%);
+  }
+
+  .hero-img {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    padding: 16px;
+  }
+
+  .hero-placeholder {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--app-border);
+    font-size: 96px;
+  }
+
+  .hero-status {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 100px;
+    background: var(--app-modal-overlay);
+    backdrop-filter: blur(10px);
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    &.musait {
+      color: #22c55e;
+      .dot { background: #22c55e; box-shadow: 0 0 8px #22c55e; }
+    }
+
+    &.dolu {
+      color: #ef4444;
+      .dot { background: #ef4444; }
+    }
+  }
+}
+
+.info-section {
+  padding: 0 20px;
+
+  .brand {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--app-text-muted);
+    margin: 0 0 4px 0;
+    letter-spacing: 1px;
+  }
+
+  .model {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--app-text);
+    margin: 0 0 24px 0;
+  }
+}
+
+.active-rental-warning {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  border-radius: 16px;
+  padding: 14px 16px;
+  margin-bottom: 24px;
+
+  .warning-icon {
+    font-size: 18px;
+    line-height: 1.2;
+  }
+
+  .warning-title {
+    color: #f59e0b;
+    font-size: 13px;
+    font-weight: 700;
+    margin: 0 0 2px 0;
+  }
+
+  .warning-text {
+    color: var(--app-text-muted);
+    font-size: 12px;
+    margin: 0;
+    line-height: 1.4;
+  }
+}
+
+.features {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 24px;
+
+  .feature-card {
+    background: var(--app-card-bg);
+    border: 1px solid var(--app-border);
+    border-radius: 18px;
+    padding: 16px 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    text-align: center;
+
+    .feature-icon {
+      font-size: 22px;
+    }
+
+    .feature-label {
+      font-size: 11px;
+      color: var(--app-text-muted);
+      letter-spacing: 0.5px;
+    }
+
+    .feature-value {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--app-text);
+    }
+  }
+}
+
+.rent-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--app-card-bg);
+  border-top: 1px solid var(--app-border);
+  padding: 16px 20px calc(32px + var(--drivora-safe-bottom));
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 100;
+
+  .price {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+
+    .amount {
+      font-size: 24px;
+      font-weight: 700;
+      color: #4a9eff;
+    }
+
+    .period {
+      font-size: 13px;
+      color: var(--app-text-muted);
+    }
+  }
+
+  .rent-btn {
+    background: linear-gradient(135deg, #4a9eff, #6c63ff);
+    color: #ffffff;
+    border: none;
+    padding: 14px 32px;
+    border-radius: 100px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+
+    &:disabled {
+      background: var(--app-icon-bg);
+      color: var(--app-text-muted);
+    }
+  }
+}
+
+.loading,
+.not-found {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  color: var(--app-text-muted);
+  gap: 12px;
+
+  ion-spinner {
+    --color: #4a9eff;
+    width: 40px;
+    height: 40px;
+  }
+
+  .back-link {
+    background: linear-gradient(135deg, #4a9eff, #6c63ff);
+    color: #ffffff;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 100px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+}

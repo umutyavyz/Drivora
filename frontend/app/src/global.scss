@@ -35,8 +35,41 @@
 
 /* @import "@ionic/angular/css/palettes/dark.always.css"; */
 /* @import "@ionic/angular/css/palettes/dark.class.css"; */
-@import '@ionic/angular/css/palettes/dark.system.css';
+@import '@ionic/angular/css/palettes/dark.class.css';
 
+:root {
+  /* Safe Areas */
+  --drivora-safe-top: max(56px, calc(env(safe-area-inset-top) + 16px));
+  --drivora-safe-bottom: env(safe-area-inset-bottom);
+
+  /* Light Theme Palette */
+  --app-bg: #f2f4f8;
+  --app-card-bg: #ffffff;
+  --app-border: rgba(0, 0, 0, 0.08);
+  --app-text: #1a1a1a;
+  --app-text-muted: rgba(0, 0, 0, 0.5);
+  --app-icon-bg: rgba(0, 0, 0, 0.05);
+  --app-overlay: rgba(255, 255, 255, 0.85);
+  --app-primary: #4a9eff;
+  --app-danger-bg: rgba(239, 68, 68, 0.1);
+  --app-success-bg: rgba(34, 197, 94, 0.1);
+  --app-modal-overlay: rgba(0, 0, 0, 0.5);
+}
+
+html.ion-palette-dark {
+  /* Dark Theme Palette */
+  --app-bg: #0a0a0a;
+  --app-card-bg: #161616;
+  --app-border: rgba(255, 255, 255, 0.08);
+  --app-text: #ffffff;
+  --app-text-muted: rgba(255, 255, 255, 0.5);
+  --app-icon-bg: rgba(255, 255, 255, 0.05);
+  --app-overlay: rgba(22, 22, 22, 0.85);
+  --app-primary: #4a9eff;
+  --app-danger-bg: rgba(239, 68, 68, 0.1);
+  --app-success-bg: rgba(34, 197, 94, 0.1);
+  --app-modal-overlay: rgba(0, 0, 0, 0.7);
+}
 
 ion-tabs ion-router-outlet {
   contain: layout style;

@@ -1,0 +1,75 @@
+<ion-content [fullscreen]="true">
+  <div class="detail-wrapper" *ngIf="!yukleniyor && arac">
+    <div class="top-bar">
+      <button class="back-btn" (click)="geri()">←</button>
+      <span class="top-title">Araç Detayı</span>
+      <span class="top-spacer"></span>
+    </div>
+
+    <div class="hero">
+      <div class="hero-bg"></div>
+      <img class="hero-img" *ngIf="arac.resim_url" [src]="arac.resim_url" [alt]="arac.marka"/>
+      <div class="hero-placeholder" *ngIf="!arac.resim_url">
+        <ion-icon name="car-outline"></ion-icon>
+      </div>
+      <div class="hero-status" [class.musait]="arac.musait" [class.dolu]="!arac.musait">
+        <span class="dot"></span>
+        {{ arac.musait ? 'Müsait' : 'Dolu' }}
+      </div>
+    </div>
+
+    <div class="info-section">
+      <p class="brand">{{ arac.marka }}</p>
+      <h1 class="model">{{ arac.model }}</h1>
+
+      <div class="features">
+        <div class="feature-card" *ngIf="arac.yakit">
+          <span class="feature-icon">⛽</span>
+          <span class="feature-label">Yakıt</span>
+          <span class="feature-value">{{ arac.yakit }}</span>
+        </div>
+        <div class="feature-card" *ngIf="arac.vites">
+          <span class="feature-icon">⚙️</span>
+          <span class="feature-label">Vites</span>
+          <span class="feature-value">{{ arac.vites }}</span>
+        </div>
+        <div class="feature-card" *ngIf="arac.kategori">
+          <span class="feature-icon">🏷️</span>
+          <span class="feature-label">Kategori</span>
+          <span class="feature-value">{{ arac.kategori }}</span>
+        </div>
+      </div>
+
+      <div class="active-rental-warning" *ngIf="aktifKiralama">
+        <span class="warning-icon">⚠️</span>
+        <div>
+          <p class="warning-title">Aktif kiralaman var</p>
+          <p class="warning-text">{{ aktifKiralama.marka }} {{ aktifKiralama.model }} — yeni kiralama için önce onu bitir.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="loading" *ngIf="yukleniyor">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>Yükleniyor...</p>
+  </div>
+
+  <div class="not-found" *ngIf="!yukleniyor && !arac">
+    <p>Araç bulunamadı.</p>
+    <button class="back-link" (click)="geri()">Geri dön</button>
+  </div>
+
+  <div class="rent-bar" *ngIf="!yukleniyor && arac">
+    <div class="price">
+      <span class="amount">₺{{ arac.gunluk_fiyat }}</span>
+      <span class="period">/ gün</span>
+    </div>
+    <button
+      class="rent-btn"
+      [disabled]="!arac.musait || !!aktifKiralama"
+      (click)="kirala()">
+      {{ !arac.musait ? 'Müsait Değil' : (aktifKiralama ? 'Aktif Kiralaman Var' : 'Kirala →') }}
+    </button>
+  </div>
+</ion-content>

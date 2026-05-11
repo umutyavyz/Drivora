@@ -51,6 +51,24 @@
       </div>
     </div>
 
+    <div class="theme-selector">
+      <p class="section-title">Tema Tercihi</p>
+      <ion-segment [(ngModel)]="seciliTema" (ionChange)="temaDegistir($event)" mode="ios">
+        <ion-segment-button value="light">
+          <ion-icon name="sunny-outline"></ion-icon>
+          Açık
+        </ion-segment-button>
+        <ion-segment-button value="dark">
+          <ion-icon name="moon-outline"></ion-icon>
+          Koyu
+        </ion-segment-button>
+        <ion-segment-button value="system">
+          <ion-icon name="desktop-outline"></ion-icon>
+          Sistem
+        </ion-segment-button>
+      </ion-segment>
+    </div>
+
     <button class="logout-btn" (click)="cikisYap()">
       <ion-icon name="log-out-outline"></ion-icon>
       Çıkış Yap

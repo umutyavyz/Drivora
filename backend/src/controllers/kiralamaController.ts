@@ -6,6 +6,16 @@ export const kiralamaBaslat = async (req: Request, res: Response) => {
     const { arac_id } = req.body;
     const kullanici_id = (req as any).kullanici.userId;
 
+    // Kullanıcının aktif kiralaması var mı kontrol et
+    const aktifKiralama = await pool.query(
+      "SELECT id FROM kiralamalar WHERE kullanici_id = $1 AND durum = 'aktif' LIMIT 1",
+      [kullanici_id]
+    );
+
+    if (aktifKiralama.rows.length > 0) {
+      return res.status(409).json({ hata: "Zaten aktif bir kiralaman var. Yeni araç kiralamak için önce mevcut kiralamayı bitir." });
+    }
+
     // Araç müsait mi kontrol et
     const aracKontrol = await pool.query(
       "SELECT * FROM araclar WHERE id = $1 AND musait = true",
@@ -42,10 +52,13 @@ export const kiralamaListele = async (req: Request, res: Response) => {
     const kullanici_id = (req as any).kullanici.userId;
 
     const result = await pool.query(
-      `SELECT k.*, a.marka, a.model 
-       FROM kiralamalar k 
-       JOIN araclar a ON k.arac_id = a.id 
-       WHERE k.kullanici_id = $1`,
+      `SELECT k.*,
+              a.marka, a.model, a.resim_url, a.kategori,
+              a.yakit, a.vites, a.gunluk_fiyat
+       FROM kiralamalar k
+       JOIN araclar a ON k.arac_id = a.id
+       WHERE k.kullanici_id = $1
+       ORDER BY (k.durum = 'aktif') DESC, k.baslangic_tarihi DESC`,
       [kullanici_id]
     );
 

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { IonContent, IonHeader, IonToolbar, IonTitle } from '@ionic/angular/standalone';
 
@@ -9,8 +9,15 @@ import { IonContent, IonHeader, IonToolbar, IonTitle } from '@ionic/angular/stan
   standalone: true,
   imports: [IonTitle, IonToolbar, IonHeader, IonContent],
 })
-export class WelcomePage {
+export class WelcomePage implements OnInit {
   constructor(private router: Router) {}
+
+  ngOnInit() {
+    const token = localStorage.getItem('token');
+    if (token) {
+      this.router.navigate(['/tabs/map'], { replaceUrl: true });
+    }
+  }
 
   basla() {
     this.router.navigate(['/login']);

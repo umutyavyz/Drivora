@@ -16,5 +16,9 @@
       <ion-icon name="person-outline"></ion-icon>
       <ion-label>Profil</ion-label>
     </ion-tab-button>
+    <ion-tab-button tab="admin" href="/tabs/admin" *ngIf="isAdmin">
+      <ion-icon name="settings-outline"></ion-icon>
+      <ion-label>Admin</ion-label>
+    </ion-tab-button>
   </ion-tab-bar>
 </ion-tabs>

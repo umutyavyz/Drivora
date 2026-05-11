@@ -1,8 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { IonHeader, IonToolbar, IonContent } from '@ionic/angular/standalone';
+import { IonContent, IonIcon, IonSpinner } from '@ionic/angular/standalone';
+import { addIcons } from 'ionicons';
+import { carOutline, searchOutline } from 'ionicons/icons';
 
 @Component({
   selector: 'app-tab1',
@@ -11,7 +14,7 @@ import { IonHeader, IonToolbar, IonContent } from '@ionic/angular/standalone';
   standalone: true,
   imports: [
     CommonModule, FormsModule,
-    IonHeader, IonToolbar, IonContent
+    IonContent, IonIcon, IonSpinner
   ],
 })
 export class Tab1Page implements OnInit {
@@ -19,23 +22,50 @@ export class Tab1Page implements OnInit {
   kategoriler = ['Tümü', 'Spor', 'Sedan', 'Ekonomik'];
   seciliKategori = 'Tümü';
   aramaMetni = '';
+  aktifKiralamaAracId: number | null = null;
+  yukleniyor = true;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private router: Router) {
+    addIcons({ carOutline, searchOutline });
+  }
+
+  detayaGit(arac: any) {
+    this.router.navigate(['/detail', arac.id]);
+  }
+
+  ionViewWillEnter() {
+    this.aktifKiralamayiGetir();
+  }
 
   ngOnInit() {
     this.araclariGetir();
+    this.aktifKiralamayiGetir();
   }
 
   araclariGetir() {
     const token = localStorage.getItem('token');
     const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
 
+    this.yukleniyor = true;
     this.http.get<any[]>('http://localhost:3000/araclar', { headers }).subscribe({
       next: (data) => {
         this.araclar = data;
+        this.yukleniyor = false;
       },
       error: (err) => {
         console.log('Hata:', err);
+        this.yukleniyor = false;
+      }
+    });
+  }
+
+  aktifKiralamayiGetir() {
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
+    this.http.get<any[]>('http://localhost:3000/kiralamalar', { headers }).subscribe({
+      next: (data) => {
+        const aktif = data.find(k => k.durum === 'aktif');
+        this.aktifKiralamaAracId = aktif ? aktif.arac_id : null;
       }
     });
   }

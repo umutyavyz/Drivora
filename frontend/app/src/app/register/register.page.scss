@@ -1,12 +1,12 @@
 ion-content {
-  --background: #0a0a0a;
+  --background: var(--app-bg);
 }
 
 .register-wrapper {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  color: white;
+  color: var(--app-text);
 }
 
 .hero-section {
@@ -30,14 +30,14 @@ ion-content {
     h1 {
       font-size: 28px;
       font-weight: 800;
-      color: white;
+      color: var(--app-text);
       margin: 0 0 8px 0;
       line-height: 1.2;
     }
 
     p {
       font-size: 13px;
-      color: rgba(255,255,255,0.8);
+      color: var(--app-text-muted);
       margin: 0;
     }
   }
@@ -52,14 +52,14 @@ ion-content {
 
     p {
       font-size: 14px;
-      color: rgba(255,255,255,0.5);
+      color: var(--app-text-muted);
       margin: 0 0 4px 0;
     }
 
     h2 {
       font-size: 26px;
       font-weight: 700;
-      color: white;
+      color: var(--app-text);
       margin: 0;
     }
   }
@@ -72,7 +72,7 @@ ion-content {
     display: block;
     font-size: 11px;
     font-weight: 600;
-    color: rgba(255,255,255,0.5);
+    color: var(--app-text-muted);
     letter-spacing: 1px;
     margin-bottom: 8px;
   }
@@ -81,15 +81,15 @@ ion-content {
     width: 100%;
     background: transparent;
     border: none;
-    border-bottom: 1px solid rgba(255,255,255,0.2);
-    color: white;
+    border-bottom: 1px solid var(--app-border);
+    color: var(--app-text);
     font-size: 16px;
     padding: 8px 0;
     outline: none;
     box-sizing: border-box;
 
     &::placeholder {
-      color: rgba(255,255,255,0.3);
+      color: var(--app-text-muted);
     }
   }
 }
@@ -97,7 +97,7 @@ ion-content {
 .register-btn {
   width: 100%;
   background: linear-gradient(135deg, #4a9eff, #6c63ff);
-  color: white;
+  color: #ffffff;
   border: none;
   border-radius: 30px;
   padding: 16px;
@@ -111,7 +111,7 @@ ion-content {
 .login-text {
   text-align: center;
   font-size: 14px;
-  color: rgba(255,255,255,0.5);
+  color: var(--app-text-muted);
 
   .login-link {
     color: #4a9eff;

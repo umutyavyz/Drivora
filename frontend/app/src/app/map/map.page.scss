@@ -1,5 +1,5 @@
 ion-content {
-  --background: #0a0a0a;
+  --background: var(--app-bg);
 }
 
 .map-container {
@@ -11,7 +11,7 @@ ion-content {
 #map {
   width: 100%;
   height: 100%;
-  background: #0a0a0a;
+  background: var(--app-bg);
 }
 
 .header-overlay {
@@ -20,14 +20,14 @@ ion-content {
   left: 0;
   right: 0;
   z-index: 1000;
-  padding: 60px 16px 16px;
+  padding: var(--drivora-safe-top) 16px 16px;
   pointer-events: none;
 
   .header-card {
-    background: rgba(22, 22, 22, 0.85);
+    background: var(--app-overlay);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--app-border);
     border-radius: 20px;
     padding: 16px 20px;
     display: flex;
@@ -40,7 +40,7 @@ ion-content {
 
       .greeting {
         font-size: 12px;
-        color: rgba(255, 255, 255, 0.5);
+        color: var(--app-text-muted);
         margin: 0 0 4px 0;
         letter-spacing: 0.5px;
       }
@@ -48,7 +48,7 @@ ion-content {
       h2 {
         font-size: 18px;
         font-weight: 700;
-        color: white;
+        color: var(--app-text);
         margin: 0;
       }
 
@@ -66,9 +66,9 @@ ion-content {
       align-items: center;
 
       .filter-btn {
-        background: rgba(255, 255, 255, 0.08);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        color: white;
+        background: var(--app-icon-bg);
+        border: 1px solid var(--app-border);
+        color: var(--app-text);
         padding: 10px 14px;
         border-radius: 12px;
         font-size: 12px;
@@ -84,13 +84,105 @@ ion-content {
       .locate-btn {
         width: 44px;
         height: 44px;
-        background: linear-gradient(135deg, #ffffff, #ffffff);
-        border: none;
+        background: var(--app-card-bg);
+        border: 1px solid var(--app-border);
         border-radius: 14px;
-        font-size: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         cursor: pointer;
       }
     }
+  }
+}
+
+// Simülasyon kontrol paneli
+.sim-panel {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 999;
+  padding: 0 16px 16px;
+  pointer-events: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: bottom 0.3s ease;
+
+  .sim-info {
+    pointer-events: auto;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--app-overlay);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--app-success-bg);
+    padding: 10px 16px;
+    border-radius: 100px;
+
+    .sim-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #22c55e;
+      box-shadow: 0 0 8px #22c55e;
+      animation: simPulse 1.4s ease-in-out infinite;
+    }
+
+    .sim-text {
+      font-size: 13px;
+      font-weight: 600;
+      color: #22c55e;
+    }
+  }
+
+  .sim-track-btn {
+    pointer-events: auto;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--app-overlay);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--app-border);
+    padding: 10px 16px;
+    border-radius: 100px;
+    color: var(--app-text-muted);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &.active {
+      background: rgba(74, 158, 255, 0.15);
+      border-color: rgba(74, 158, 255, 0.4);
+      color: #4a9eff;
+    }
+  }
+}
+
+.map-loading {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1500;
+  background: var(--app-overlay);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--app-border);
+  border-radius: 18px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  ion-spinner {
+    --color: #4a9eff;
+    width: 32px;
+    height: 32px;
   }
 }
 
@@ -99,17 +191,17 @@ ion-content {
   bottom: 0;
   left: 0;
   right: 0;
-  background: #161616;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--app-card-bg);
+  border-top: 1px solid var(--app-border);
   border-radius: 24px 24px 0 0;
-  padding: 12px 20px 32px;
+  padding: 12px 20px calc(32px + var(--drivora-safe-bottom));
   z-index: 1000;
   animation: slideUp 0.3s ease;
 
   .sheet-handle {
     width: 40px;
     height: 4px;
-    background: rgba(255, 255, 255, 0.2);
+    background: var(--app-border);
     border-radius: 2px;
     margin: 0 auto 16px;
   }
@@ -117,13 +209,19 @@ ion-content {
   .info-header {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 12px;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+
+    .header-text {
+      flex: 1;
+      min-width: 0;
+    }
 
     .brand {
       font-size: 12px;
       font-weight: 600;
-      color: rgba(255, 255, 255, 0.5);
+      color: var(--app-text-muted);
       margin: 0 0 2px 0;
       letter-spacing: 1px;
     }
@@ -131,40 +229,130 @@ ion-content {
     h3 {
       font-size: 22px;
       font-weight: 700;
-      color: white;
-      margin: 0;
+      color: var(--app-text);
+      margin: 0 0 8px 0;
     }
 
-    .distance {
-      font-size: 12px;
+    .walk-info {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      font-weight: 600;
       color: #4a9eff;
-      margin: 6px 0 0 0;
-      font-weight: 500;
+
+      .walk-svg {
+        flex-shrink: 0;
+      }
+
+      .walk-dist {
+        color: var(--app-text-muted);
+        font-weight: 500;
+      }
+    }
+
+    .header-image {
+      width: 96px;
+      height: 64px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+      }
+
+      .image-placeholder {
+        opacity: 0.3;
+      }
     }
 
     .close-btn {
       width: 32px;
       height: 32px;
-      background: rgba(255, 255, 255, 0.08);
-      border: none;
+      background: var(--app-icon-bg);
+      border: 1px solid var(--app-border);
       border-radius: 50%;
-      color: white;
+      color: var(--app-text);
       font-size: 14px;
       cursor: pointer;
+      flex-shrink: 0;
     }
   }
 
-  .info-image {
-    height: 120px;
-    margin: 8px 0;
+  .sim-status-banner {
     display: flex;
     align-items: center;
-    justify-content: center;
+    gap: 8px;
+    background: var(--app-success-bg);
+    border: 1px solid rgba(34, 197, 94, 0.25);
+    border-radius: 12px;
+    padding: 10px 14px;
+    margin-bottom: 12px;
 
-    img {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
+    .sim-status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #22c55e;
+      box-shadow: 0 0 6px #22c55e;
+      animation: simPulse 1.4s ease-in-out infinite;
+      flex-shrink: 0;
+    }
+
+    .sim-status-text {
+      font-size: 12px;
+      color: #22c55e;
+      font-weight: 600;
+    }
+  }
+
+  .quick-specs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+
+    .spec {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--app-icon-bg);
+      border: 1px solid var(--app-border);
+      padding: 8px 12px;
+      border-radius: 100px;
+
+      .spec-svg {
+        flex-shrink: 0;
+        color: var(--app-text-muted);
+      }
+
+      .spec-text {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--app-text);
+      }
+    }
+  }
+
+  .active-rental-banner {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(245, 158, 11, 0.1);
+    border: 1px solid rgba(245, 158, 11, 0.25);
+    border-radius: 12px;
+    padding: 10px 14px;
+    margin-bottom: 12px;
+
+    .banner-text {
+      font-size: 12px;
+      color: #f59e0b;
+      font-weight: 500;
+      line-height: 1.4;
     }
   }
 
@@ -187,29 +375,97 @@ ion-content {
 
       .period {
         font-size: 13px;
-        color: rgba(255, 255, 255, 0.5);
+        color: var(--app-text-muted);
       }
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .detail-btn {
+      background: var(--app-icon-bg);
+      border: 1px solid var(--app-border);
+      color: var(--app-text);
+      padding: 14px 20px;
+      border-radius: 100px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
     }
 
     .rent-btn {
       background: linear-gradient(135deg, #4a9eff, #6c63ff);
-      color: white;
+      color: #ffffff;
       border: none;
-      padding: 14px 32px;
+      padding: 14px 28px;
       border-radius: 100px;
       font-size: 14px;
       font-weight: 700;
       cursor: pointer;
 
+      &.danger-btn {
+        background: rgba(239, 68, 68, 0.1);
+        border: 1px solid rgba(239, 68, 68, 0.4);
+        color: #ef4444;
+      }
+
       &:disabled {
-        background: rgba(255, 255, 255, 0.08);
-        color: rgba(255, 255, 255, 0.3);
+        background: var(--app-icon-bg);
+        color: var(--app-text-muted);
       }
     }
+  }
+}
+
+// Simülasyon marker animasyonları (global scope çünkü Leaflet DOM'a doğrudan ekler)
+:host ::ng-deep {
+  .sim-marker-container {
+    position: relative;
+    width: 52px;
+    height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .sim-pulse-ring {
+    position: absolute;
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: rgba(34, 197, 94, 0.2);
+    animation: simRingPulse 2s ease-in-out infinite;
+  }
+
+  .sim-marker {
+    position: relative;
+    width: 44px;
+    height: 44px;
+    background: #22c55e;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.35), 0 4px 16px rgba(0, 0, 0, 0.5);
+    transition: transform 0.3s ease;
   }
 }
 
 @keyframes slideUp {
   from { transform: translateY(100%); }
   to { transform: translateY(0); }
+}
+
+@keyframes simPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.85); }
+}
+
+@keyframes simRingPulse {
+  0% { transform: scale(0.8); opacity: 0.6; }
+  50% { transform: scale(1.3); opacity: 0; }
+  100% { transform: scale(0.8); opacity: 0; }
 }

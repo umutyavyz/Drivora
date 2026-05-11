@@ -15,8 +15,14 @@
     </button>
   </div>
 
-  <div class="arac-list">
-    <div class="arac-card" *ngFor="let arac of filtrelenmisAraclar()">
+  <div class="loading-state" *ngIf="yukleniyor">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>Araçlar yükleniyor...</p>
+  </div>
+
+  <div class="arac-list" *ngIf="!yukleniyor">
+    <div class="arac-card" *ngFor="let arac of filtrelenmisAraclar()" [class.aktif-kiralama]="arac.id === aktifKiralamaAracId">
+      <div class="rental-badge" *ngIf="arac.id === aktifKiralamaAracId">SENİN KİRALAMAN</div>
       <div class="card-header">
         <div class="brand-info">
           <p class="brand">{{ arac.marka }}</p>
@@ -29,7 +35,10 @@
       </div>
 
       <div class="card-image">
-        <img [src]="arac.resim_url || 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=600'" [alt]="arac.marka"/>
+        <img *ngIf="arac.resim_url" [src]="arac.resim_url" [alt]="arac.marka"/>
+        <div class="image-placeholder" *ngIf="!arac.resim_url">
+          <ion-icon name="car-outline"></ion-icon>
+        </div>
       </div>
 
       <div class="card-footer">
@@ -37,14 +46,16 @@
           <span class="dot"></span>
           {{ arac.musait ? 'Müsait' : 'Dolu' }}
         </div>
-        <button class="detail-btn" [disabled]="!arac.musait">
+        <button class="detail-btn" [disabled]="!arac.musait" (click)="detayaGit(arac)">
           Detay →
         </button>
       </div>
     </div>
 
     <div class="empty-state" *ngIf="filtrelenmisAraclar().length === 0">
-      <p>Bu kategoride araç bulunamadı.</p>
+      <ion-icon [name]="aramaMetni ? 'search-outline' : 'car-outline'" class="empty-icon"></ion-icon>
+      <h3>{{ aramaMetni ? 'Sonuç bulunamadı' : 'Araç yok' }}</h3>
+      <p>{{ aramaMetni ? '"' + aramaMetni + '" için eşleşen araç yok. Farklı bir anahtar kelime dene.' : 'Bu kategoride şu an müsait araç bulunmuyor.' }}</p>
     </div>
   </div>
 

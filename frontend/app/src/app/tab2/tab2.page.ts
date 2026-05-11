@@ -1,46 +1,77 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { IonContent, IonIcon, ToastController, AlertController } from '@ionic/angular/standalone';
+import { IonContent, IonIcon, IonSpinner, ToastController, AlertController } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { calendarOutline, flagOutline, carOutline } from 'ionicons/icons';
+import { calendarOutline, flagOutline, carOutline, timeOutline } from 'ionicons/icons';
 
 @Component({
   selector: 'app-tab2',
   templateUrl: 'tab2.page.html',
   styleUrls: ['tab2.page.scss'],
   standalone: true,
-  imports: [CommonModule, IonContent, IonIcon],
+  imports: [CommonModule, IonContent, IonIcon, IonSpinner],
 })
-export class Tab2Page implements OnInit {
+export class Tab2Page implements OnInit, OnDestroy {
   kiralamalar: any[] = [];
+  simdi = Date.now();
+  yukleniyor = true;
+  private timerId: any = null;
 
   constructor(
     private http: HttpClient,
     private toastCtrl: ToastController,
     private alertCtrl: AlertController
   ) {
-    addIcons({ calendarOutline, flagOutline, carOutline });
+    addIcons({ calendarOutline, flagOutline, carOutline, timeOutline });
   }
 
   ngOnInit() {
     this.kiralamalariGetir();
+    this.timerId = setInterval(() => {
+      this.simdi = Date.now();
+    }, 1000);
+  }
+
+  ngOnDestroy() {
+    if (this.timerId) clearInterval(this.timerId);
   }
 
   ionViewWillEnter() {
     this.kiralamalariGetir();
   }
 
+  sureMetni(baslangic: string, bitis?: string): string {
+    const baslangicMs = new Date(baslangic).getTime();
+    const bitisMs = bitis ? new Date(bitis).getTime() : this.simdi;
+    let toplamSaniye = Math.max(0, Math.floor((bitisMs - baslangicMs) / 1000));
+
+    const gun = Math.floor(toplamSaniye / 86400);
+    toplamSaniye -= gun * 86400;
+    const saat = Math.floor(toplamSaniye / 3600);
+    toplamSaniye -= saat * 3600;
+    const dakika = Math.floor(toplamSaniye / 60);
+    const saniye = toplamSaniye - dakika * 60;
+
+    if (gun > 0) return `${gun} gün ${saat} saat`;
+    if (saat > 0) return `${saat} saat ${dakika} dakika`;
+    if (dakika > 0) return `${dakika} dakika ${saniye} sn`;
+    return `${saniye} sn`;
+  }
+
   kiralamalariGetir() {
     const token = localStorage.getItem('token');
     const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
 
+    this.yukleniyor = true;
     this.http.get<any[]>('http://localhost:3000/kiralamalar', { headers }).subscribe({
       next: (data) => {
         this.kiralamalar = data;
+        this.yukleniyor = false;
       },
       error: (err) => {
         console.log('Hata:', err);
+        this.yukleniyor = false;
       }
     });
   }

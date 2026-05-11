@@ -1,11 +1,11 @@
 ion-content {
-  --background: #0a0a0a;
+  --background: var(--app-bg);
 }
 
 .page-container {
   min-height: 100vh;
-  padding: 60px 20px 32px;
-  color: white;
+  padding: var(--drivora-safe-top) 20px 32px;
+  color: var(--app-text);
 }
 
 .header {
@@ -13,7 +13,7 @@ ion-content {
 
   .greeting {
     font-size: 13px;
-    color: rgba(255, 255, 255, 0.5);
+    color: var(--app-text-muted);
     margin: 0 0 4px 0;
     letter-spacing: 0.5px;
   }
@@ -22,13 +22,13 @@ ion-content {
     font-size: 28px;
     font-weight: 800;
     margin: 0;
-    color: white;
+    color: var(--app-text);
   }
 }
 
 .profile-card {
-  background: #161616;
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: var(--app-card-bg);
+  border: 1px solid var(--app-border);
   border-radius: 24px;
   padding: 32px 24px;
   text-align: center;
@@ -50,7 +50,7 @@ ion-content {
 
       .avatar-icon {
         font-size: 44px;
-        color: white;
+        color: #ffffff; /* always white on primary gradient */
       }
     }
 
@@ -65,11 +65,11 @@ ion-content {
       display: flex;
       align-items: center;
       justify-content: center;
-      border: 3px solid #161616;
+      border: 3px solid var(--app-card-bg);
 
       ion-icon {
         font-size: 14px;
-        color: white;
+        color: #ffffff;
       }
     }
   }
@@ -77,7 +77,7 @@ ion-content {
   h2 {
     font-size: 18px;
     font-weight: 700;
-    color: white;
+    color: var(--app-text);
     margin: 0 0 8px 0;
   }
 
@@ -95,8 +95,8 @@ ion-content {
 }
 
 .info-list {
-  background: #161616;
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: var(--app-card-bg);
+  border: 1px solid var(--app-border);
   border-radius: 24px;
   overflow: hidden;
   margin-bottom: 24px;
@@ -106,7 +106,7 @@ ion-content {
     align-items: center;
     gap: 14px;
     padding: 16px 20px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid var(--app-border);
 
     &:last-child {
       border-bottom: none;
@@ -133,7 +133,7 @@ ion-content {
 
       .info-label {
         font-size: 11px;
-        color: rgba(255, 255, 255, 0.4);
+        color: var(--app-text-muted);
         margin: 0 0 2px 0;
         letter-spacing: 0.5px;
         text-transform: uppercase;
@@ -141,9 +141,43 @@ ion-content {
 
       .info-value {
         font-size: 14px;
-        color: white;
+        color: var(--app-text);
         margin: 0;
         font-weight: 500;
+      }
+    }
+  }
+}
+
+.theme-selector {
+  margin-bottom: 24px;
+
+  .section-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--app-text-muted);
+    margin: 0 0 12px 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  ion-segment {
+    background: var(--app-card-bg);
+    border: 1px solid var(--app-border);
+    padding: 4px;
+    border-radius: 12px;
+
+    ion-segment-button {
+      --color: var(--app-text-muted);
+      --color-checked: var(--app-text);
+      --indicator-color: var(--app-icon-bg);
+      font-size: 12px;
+      font-weight: 600;
+      min-height: 40px;
+
+      ion-icon {
+        font-size: 16px;
+        margin-bottom: 4px;
       }
     }
   }

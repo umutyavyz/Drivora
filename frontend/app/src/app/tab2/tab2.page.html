@@ -7,10 +7,18 @@
       <p class="subtitle">{{ kiralamalar.length }} kiralama</p>
     </div>
 
-    <div class="kiralama-list" *ngIf="kiralamalar.length > 0">
+    <div class="loading-state" *ngIf="yukleniyor">
+      <ion-spinner name="crescent"></ion-spinner>
+      <p>Kiralamalar yükleniyor...</p>
+    </div>
+
+    <div class="kiralama-list" *ngIf="!yukleniyor && kiralamalar.length > 0">
       <div class="kiralama-card" *ngFor="let kiralama of kiralamalar">
         <div class="card-image">
-          <img [src]="kiralama.resim_url || 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=600'" [alt]="kiralama.marka"/>
+          <img *ngIf="kiralama.resim_url" [src]="kiralama.resim_url" [alt]="kiralama.marka"/>
+          <div class="image-placeholder" *ngIf="!kiralama.resim_url">
+            <ion-icon name="car-outline"></ion-icon>
+          </div>
           <div class="status-badge" [class.aktif]="kiralama.durum === 'aktif'">
             <span class="dot"></span>
             {{ kiralama.durum }}
@@ -41,6 +49,13 @@
                 <p class="info-value">{{ kiralama.bitis_tarihi | date:'dd MMM yyyy, HH:mm' }}</p>
               </div>
             </div>
+            <div class="info-row duration-row" [class.live]="kiralama.durum === 'aktif'">
+              <ion-icon name="time-outline" class="info-icon"></ion-icon>
+              <div class="info-content">
+                <p class="info-label">{{ kiralama.durum === 'aktif' ? 'Geçen süre' : 'Toplam süre' }}</p>
+                <p class="info-value">{{ sureMetni(kiralama.baslangic_tarihi, kiralama.bitis_tarihi) }}<span class="live-dot" *ngIf="kiralama.durum === 'aktif'"></span></p>
+              </div>
+            </div>
           </div>
 
           <div class="card-actions" *ngIf="kiralama.durum === 'aktif'">
@@ -50,7 +65,7 @@
       </div>
     </div>
 
-    <div class="empty-state" *ngIf="kiralamalar.length === 0">
+    <div class="empty-state" *ngIf="!yukleniyor && kiralamalar.length === 0">
       <ion-icon name="car-outline" class="empty-icon"></ion-icon>
       <h3>Henüz kiralaman yok</h3>
       <p>Haritadan veya araçlar sekmesinden bir araç seçerek kiralama başlat.</p>

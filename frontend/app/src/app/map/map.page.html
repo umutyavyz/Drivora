@@ -5,44 +5,103 @@
     <div class="header-overlay">
       <div class="header-card">
         <div class="user-info">
-          <p class="greeting">Yakındaki Araçlar</p>
-          <h2>{{ yakindakiAraclar.length }} araç bulundu</h2>
-          <p class="closest" *ngIf="enYakinArac">
+          <p class="greeting">{{ aktifKiralamaAracId ? 'Aktif Kiralamanız Var' : 'Yakındaki Araçlar' }}</p>
+          <h2 *ngIf="!aktifKiralamaAracId">{{ yakindakiAraclar.length }} araç bulundu</h2>
+          <h2 *ngIf="aktifKiralamaAracId">Güvenli Sürüşler!</h2>
+          <p class="closest" *ngIf="enYakinArac && !aktifKiralamaAracId">
             En yakın: {{ enYakinArac.marka }} {{ enYakinArac.model }} • {{ enYakinArac.mesafe }}m
+          </p>
+          <p class="closest" *ngIf="aktifKiralamaAracId && enYakinArac" style="color: #22c55e;">
+            Kullanılan araç: {{ enYakinArac.marka }} {{ enYakinArac.model }}
           </p>
         </div>
         <div class="header-actions">
-          
-          <button class="locate-btn" (click)="kullaniciKonumunaGit()">📍</button>
+          <button class="locate-btn" (click)="kullaniciKonumunaGit()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0a0a0a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg>
+          </button>
         </div>
       </div>
+    </div>
+
+    <!-- Simülasyon kontrol paneli -->
+    <div class="sim-panel" *ngIf="simAktif">
+      <div class="sim-info">
+        <span class="sim-dot"></span>
+        <span class="sim-text">Aracın hareket ediyor</span>
+      </div>
+      <button class="sim-track-btn" [class.active]="simTakipModu" (click)="takipModunuDegistir()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
+        {{ simTakipModu ? 'Takip Açık' : 'Takip Et' }}
+      </button>
+    </div>
+
+    <div class="map-loading" *ngIf="yukleniyor">
+      <ion-spinner name="crescent"></ion-spinner>
     </div>
 
     <div class="bottom-sheet" *ngIf="seciliArac">
       <div class="sheet-handle"></div>
       <div class="arac-info">
         <div class="info-header">
-          <div>
+          <div class="header-text">
             <p class="brand">{{ seciliArac.marka }}</p>
             <h3>{{ seciliArac.model }}</h3>
-            <p class="distance">📍 {{ seciliArac.mesafe }}m uzaklıkta</p>
+            <div class="walk-info" *ngIf="seciliArac.id !== aktifKiralamaAracId">
+              <svg class="walk-svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4a9eff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="2"/><path d="M10 22l2-7 3 3v6M14 13l2-2 2 2M10 13L6 9"/></svg>
+              <span class="walk-time">{{ yuruyusDakika }} dk</span>
+              <span class="walk-dist">• {{ seciliArac.mesafe }}m</span>
+            </div>
           </div>
-          <button class="close-btn" (click)="seciliArac = null">✕</button>
+          <div class="header-image">
+            <img *ngIf="seciliArac.resim_url" [src]="seciliArac.resim_url" [alt]="seciliArac.marka"/>
+            <div class="image-placeholder" *ngIf="!seciliArac.resim_url">
+              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="1.5"><path d="M5 11L6.5 6.5C6.78 5.61 7.61 5 8.55 5H15.45C16.39 5 17.22 5.61 17.5 6.5L19 11M5 11H19M5 11V17C5 17.55 5.45 18 6 18H7C7.55 18 8 17.55 8 17V16H16V17C16 17.55 16.45 18 17 18H18C18.55 18 19 17.55 19 17V11"/></svg>
+            </div>
+          </div>
+          <button class="close-btn" (click)="seciliyiKapat()">✕</button>
         </div>
-        <div class="info-image">
-          <img [src]="seciliArac.resim_url" [alt]="seciliArac.marka"/>
+
+        <!-- Simülasyon durumu (aktif kiralanan araç seçili olduğunda) -->
+        <div class="sim-status-banner" *ngIf="seciliArac.id === aktifKiralamaAracId && simAktif">
+          <span class="sim-status-dot"></span>
+          <span class="sim-status-text">Bu araç şu an hareket halinde</span>
         </div>
+
+        <div class="quick-specs" *ngIf="seciliArac.yakit || seciliArac.vites || seciliArac.kategori">
+          <div class="spec" *ngIf="seciliArac.yakit">
+            <svg class="spec-svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 22V6a2 2 0 012-2h6a2 2 0 012 2v16M3 22h10M13 10h2a2 2 0 012 2v4a2 2 0 002 2 2 2 0 002-2V8l-4-2"/></svg>
+            <span class="spec-text">{{ seciliArac.yakit }}</span>
+          </div>
+          <div class="spec" *ngIf="seciliArac.vites">
+            <svg class="spec-svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v8M12 15v8M4.22 4.22l5.66 5.66M14.12 14.12l5.66 5.66M1 12h8M15 12h8M4.22 19.78l5.66-5.66M14.12 9.88l5.66-5.66"/></svg>
+            <span class="spec-text">{{ seciliArac.vites }}</span>
+          </div>
+          <div class="spec" *ngIf="seciliArac.kategori">
+            <svg class="spec-svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+            <span class="spec-text">{{ seciliArac.kategori }}</span>
+          </div>
+        </div>
+
+        <div class="active-rental-banner" *ngIf="aktifKiralamaAracId && seciliArac.id !== aktifKiralamaAracId">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <span class="banner-text">Aktif bir kiralaman var. Yeni kiralama için önce onu bitir.</span>
+        </div>
+
         <div class="info-footer">
           <div class="price">
             <span class="amount">₺{{ seciliArac.gunluk_fiyat }}</span>
             <span class="period">/ gün</span>
           </div>
-          <button 
-            class="rent-btn" 
-            [disabled]="!seciliArac.musait"
-            (click)="kirala()">
-            {{ seciliArac.musait ? 'Kirala →' : 'Müsait Değil' }}
-          </button>
+          <div class="action-buttons">
+            <button class="detail-btn" (click)="detayaGit()">Detay</button>
+            <button
+              class="rent-btn"
+              [class.danger-btn]="seciliArac.id === aktifKiralamaAracId"
+              [disabled]="seciliArac.id !== aktifKiralamaAracId && (!seciliArac.musait || !!aktifKiralamaAracId)"
+              (click)="seciliArac.id === aktifKiralamaAracId ? kiralamayiBitir() : kirala()">
+              {{ seciliArac.id === aktifKiralamaAracId ? 'Kiralamayı Bitir' : (!seciliArac.musait ? 'Müsait Değil' : (aktifKiralamaAracId ? 'Aktif Kiralaman Var' : 'Kiralamayı Başlat →')) }}
+            </button>
+          </div>
         </div>
       </div>
     </div>
