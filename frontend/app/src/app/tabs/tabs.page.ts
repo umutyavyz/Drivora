@@ -33,6 +33,9 @@ export class TabsPage {
       } catch {
         this.isAdmin = false;
       }
+      return;
     }
+
+    this.isAdmin = false;
   }
 }

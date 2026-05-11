@@ -21,7 +21,7 @@
           </div>
           <div class="status-badge" [class.aktif]="kiralama.durum === 'aktif'">
             <span class="dot"></span>
-            {{ kiralama.durum }}
+            {{ kiralama.durum === 'tamamlandi' ? 'Tamamlandı' : 'Aktif' }}
           </div>
         </div>
 

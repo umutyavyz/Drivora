@@ -1,51 +1,55 @@
 <ion-content [fullscreen]="true">
   <div class="page-container">
-
     <div class="header">
       <p class="greeting">Yönetim</p>
       <h1>Admin Paneli</h1>
-      <p class="subtitle">{{ araclar.length }} araç kayıtlı</p>
+      <p class="subtitle">{{ panelAltBaslik }}</p>
     </div>
 
-    <div class="search-bar">
+    <div class="sekme-bar">
+      <button class="sekme-btn" [class.active]="aktifSekme === 'araclar'" (click)="sekmeDegistir('araclar')">Araçlar</button>
+      <button class="sekme-btn" [class.active]="aktifSekme === 'kullanicilar'" (click)="sekmeDegistir('kullanicilar')">Kullanıcılar</button>
+      <button class="sekme-btn" [class.active]="aktifSekme === 'kiralamalar'" (click)="sekmeDegistir('kiralamalar')">Kiralamalar</button>
+    </div>
+
+    <div class="search-bar" *ngIf="aktifSekme === 'araclar'">
       <ion-icon name="search-outline" class="search-icon"></ion-icon>
-      <input type="text" placeholder="Araç ara..." [(ngModel)]="aramaMetni"/>
+      <input type="text" placeholder="Araç ara..." [(ngModel)]="aramaMetniArac" />
     </div>
 
-    <div class="loading-state" *ngIf="yukleniyor">
+    <div class="search-bar" *ngIf="aktifSekme === 'kullanicilar'">
+      <ion-icon name="search-outline" class="search-icon"></ion-icon>
+      <input type="text" placeholder="Kullanıcı ara..." [(ngModel)]="aramaMetniKullanici" />
+    </div>
+
+    <div class="search-bar" *ngIf="aktifSekme === 'kiralamalar'">
+      <ion-icon name="search-outline" class="search-icon"></ion-icon>
+      <input type="text" placeholder="Email, marka veya model ara..." [(ngModel)]="aramaMetniKiralama" />
+    </div>
+
+    <div class="loading-state" *ngIf="aktifSekme === 'araclar' && yukleniyorAraclar">
       <ion-spinner name="crescent"></ion-spinner>
       <p>Araçlar yükleniyor...</p>
     </div>
 
-    <div class="arac-list" *ngIf="!yukleniyor">
-      <div class="arac-card" *ngFor="let arac of filtrelenmisAraclar()">
+    <div class="arac-list" *ngIf="aktifSekme === 'araclar' && !yukleniyorAraclar">
+      <div class="card" *ngFor="let arac of filtrelenmisAraclar()">
         <div class="card-top">
-          <div class="card-info">
-            <div class="brand-row">
-              <span class="brand">{{ arac.marka }}</span>
-              <span class="arac-id">#{{ arac.id }}</span>
-            </div>
-            <h3 class="model">{{ arac.model }}</h3>
-            <div class="specs">
-              <span class="spec-tag" *ngIf="arac.kategori">{{ arac.kategori }}</span>
-              <span class="spec-tag" *ngIf="arac.yakit">{{ arac.yakit }}</span>
-              <span class="spec-tag" *ngIf="arac.vites">{{ arac.vites }}</span>
+          <div>
+            <p class="meta">#{{ arac.id }} · {{ arac.kategori || 'Kategori yok' }}</p>
+            <h3>{{ arac.marka }} {{ arac.model }}</h3>
+            <div class="tag-row">
+              <span class="tag" *ngIf="arac.yakit">{{ arac.yakit }}</span>
+              <span class="tag" *ngIf="arac.vites">{{ arac.vites }}</span>
+              <span class="tag price">₺{{ arac.gunluk_fiyat }}/gün</span>
             </div>
           </div>
-          <div class="card-right">
-            <div class="price">₺{{ arac.gunluk_fiyat }}<span class="period">/gün</span></div>
-            <button
-              class="status-toggle"
-              [class.musait]="arac.musait"
-              [class.dolu]="!arac.musait"
-              (click)="musaitlikDegistir(arac)">
-              <span class="dot"></span>
-              {{ arac.musait ? 'Müsait' : 'Dolu' }}
-            </button>
-          </div>
+          <button class="status-toggle" [class.musait]="arac.musait" [class.dolu]="!arac.musait" (click)="musaitlikDegistir(arac)">
+            {{ arac.musait ? 'Müsait' : 'Dolu' }}
+          </button>
         </div>
         <div class="card-actions">
-          <button class="edit-btn" (click)="duzenleFormu(arac)">
+          <button class="edit-btn" (click)="aracDuzenleFormu(arac)">
             <ion-icon name="create-outline"></ion-icon>
             Düzenle
           </button>
@@ -59,21 +63,102 @@
       <div class="empty-state" *ngIf="filtrelenmisAraclar().length === 0">
         <ion-icon name="car-outline" class="empty-icon"></ion-icon>
         <h3>Araç bulunamadı</h3>
-        <p>{{ aramaMetni ? 'Farklı bir anahtar kelime dene.' : 'Henüz araç eklenmemiş.' }}</p>
       </div>
     </div>
 
-    <!-- FAB: Yeni Araç Ekle -->
-    <button class="fab-btn" (click)="yeniAracFormu()">
+    <div class="loading-state" *ngIf="aktifSekme === 'kullanicilar' && yukleniyorKullanicilar">
+      <ion-spinner name="crescent"></ion-spinner>
+      <p>Kullanıcılar yükleniyor...</p>
+    </div>
+
+    <div class="kullanici-list" *ngIf="aktifSekme === 'kullanicilar' && !yukleniyorKullanicilar">
+      <div class="card" *ngFor="let kullanici of filtrelenmisKullanicilar()">
+        <div class="card-top">
+          <div>
+            <p class="meta">Kullanıcı #{{ kullanici.id }}</p>
+            <h3>{{ kullanici.email }}</h3>
+            <div class="tag-row">
+              <span class="tag role" [class.admin]="kullanici.rol === 'admin'">
+                {{ kullanici.rol === 'admin' ? 'Yönetici' : 'Kullanıcı' }}
+              </span>
+            </div>
+          </div>
+        </div>
+        <div class="card-actions">
+          <button class="edit-btn" (click)="kullaniciDuzenleFormu(kullanici)">
+            <ion-icon name="create-outline"></ion-icon>
+            Düzenle
+          </button>
+          <button class="delete-btn" (click)="kullaniciSil(kullanici)">
+            <ion-icon name="trash-outline"></ion-icon>
+            Sil
+          </button>
+        </div>
+      </div>
+
+      <div class="empty-state" *ngIf="filtrelenmisKullanicilar().length === 0">
+        <ion-icon name="people-outline" class="empty-icon"></ion-icon>
+        <h3>Kullanıcı bulunamadı</h3>
+      </div>
+    </div>
+
+    <div *ngIf="aktifSekme === 'kiralamalar'">
+      <div class="alt-sekme-bar">
+        <button
+          class="sekme-btn"
+          [class.active]="aktifKiralamaSekmesi === 'aktif'"
+          (click)="kiralamaSekmesiDegistir('aktif')">
+          Aktif Kiralamalar
+        </button>
+        <button
+          class="sekme-btn"
+          [class.active]="aktifKiralamaSekmesi === 'tamamlandi'"
+          (click)="kiralamaSekmesiDegistir('tamamlandi')">
+          Tamamlananlar
+        </button>
+      </div>
+
+      <div class="loading-state" *ngIf="yukleniyorKiralamalar">
+        <ion-spinner name="crescent"></ion-spinner>
+        <p>Kiralamalar yükleniyor...</p>
+      </div>
+
+      <div class="kiralama-list" *ngIf="!yukleniyorKiralamalar">
+        <div class="card" *ngFor="let kiralama of filtrelenmisKiralamalar()">
+          <div class="card-top">
+            <div>
+              <p class="meta">Kiralama #{{ kiralama.id }}</p>
+              <h3>{{ kiralama.marka }} {{ kiralama.model }}</h3>
+            </div>
+            <span class="durum-badge" [class.aktif]="kiralama.durum === 'aktif'" [class.tamamlandi]="kiralama.durum === 'tamamlandi'">
+              {{ kiralama.durum === 'aktif' ? 'Aktif' : 'Tamamlandı' }}
+            </span>
+          </div>
+
+          <div class="kiralama-detay">
+            <p><ion-icon name="mail-outline"></ion-icon> {{ kiralama.kullanici_email }}</p>
+            <p><ion-icon name="time-outline"></ion-icon> Başlangıç: {{ tarihFormatla(kiralama.baslangic_tarihi) }}</p>
+            <p><ion-icon name="time-outline"></ion-icon> Bitiş: {{ kiralama.bitis_tarihi ? tarihFormatla(kiralama.bitis_tarihi) : 'Devam ediyor' }}</p>
+            <p><ion-icon name="key-outline"></ion-icon> Ücret: ₺{{ kiralama.gunluk_fiyat }}/gün</p>
+          </div>
+        </div>
+
+        <div class="empty-state" *ngIf="filtrelenmisKiralamalar().length === 0">
+          <ion-icon name="settings-outline" class="empty-icon"></ion-icon>
+          <h3>Kiralama bulunamadı</h3>
+        </div>
+      </div>
+    </div>
+
+    <button class="fab-btn" *ngIf="aktifSekme !== 'kiralamalar'" (click)="hizliEkleTikla()">
       <ion-icon name="add-outline"></ion-icon>
     </button>
 
-    <!-- Modal: Araç Formu -->
-    <div class="modal-overlay" *ngIf="formAcik" (click)="formuKapat()">
+    <div class="modal-overlay" *ngIf="aracFormAcik" (click)="aracFormuKapat()">
       <div class="modal-content" (click)="$event.stopPropagation()">
         <div class="modal-header">
-          <h2>{{ duzenleModu ? 'Aracı Düzenle' : 'Yeni Araç Ekle' }}</h2>
-          <button class="close-btn" (click)="formuKapat()">
+          <h2>{{ aracDuzenleModu ? 'Aracı Düzenle' : 'Yeni Araç Ekle' }}</h2>
+          <button class="close-btn" (click)="aracFormuKapat()">
             <ion-icon name="close-outline"></ion-icon>
           </button>
         </div>
@@ -81,58 +166,91 @@
         <div class="modal-body">
           <div class="form-group">
             <label>Marka</label>
-            <input type="text" [(ngModel)]="formVerisi.marka" placeholder="örn. BMW"/>
+            <input type="text" [(ngModel)]="aracFormVerisi.marka" placeholder="örn. BMW" />
           </div>
           <div class="form-group">
             <label>Model</label>
-            <input type="text" [(ngModel)]="formVerisi.model" placeholder="örn. M4"/>
+            <input type="text" [(ngModel)]="aracFormVerisi.model" placeholder="örn. M4" />
           </div>
           <div class="form-row">
             <div class="form-group half">
               <label>Günlük Fiyat (₺)</label>
-              <input type="number" [(ngModel)]="formVerisi.gunluk_fiyat"/>
+              <input type="number" [(ngModel)]="aracFormVerisi.gunluk_fiyat" />
             </div>
             <div class="form-group half">
               <label>Kategori</label>
-              <select [(ngModel)]="formVerisi.kategori">
-                <option *ngFor="let k of kategoriler" [value]="k">{{ k }}</option>
+              <select [(ngModel)]="aracFormVerisi.kategori">
+                <option *ngFor="let kategori of kategoriler" [value]="kategori">{{ kategori }}</option>
               </select>
             </div>
           </div>
           <div class="form-row">
             <div class="form-group half">
               <label>Yakıt</label>
-              <select [(ngModel)]="formVerisi.yakit">
-                <option *ngFor="let y of yakitlar" [value]="y">{{ y }}</option>
+              <select [(ngModel)]="aracFormVerisi.yakit">
+                <option *ngFor="let yakit of yakitlar" [value]="yakit">{{ yakit }}</option>
               </select>
             </div>
             <div class="form-group half">
               <label>Vites</label>
-              <select [(ngModel)]="formVerisi.vites">
-                <option *ngFor="let v of vitesler" [value]="v">{{ v }}</option>
+              <select [(ngModel)]="aracFormVerisi.vites">
+                <option *ngFor="let vites of vitesler" [value]="vites">{{ vites }}</option>
               </select>
             </div>
           </div>
           <div class="form-group">
-            <label>Resim URL (opsiyonel)</label>
-            <input type="text" [(ngModel)]="formVerisi.resim_url" placeholder="https://..."/>
+            <label>Resim URL</label>
+            <input type="text" [(ngModel)]="aracFormVerisi.resim_url" placeholder="https://..." />
           </div>
           <div class="form-group toggle-group">
             <label>Müsait</label>
-            <button
-              class="toggle-btn"
-              [class.active]="formVerisi.musait"
-              (click)="formVerisi.musait = !formVerisi.musait">
-              {{ formVerisi.musait ? 'Evet' : 'Hayır' }}
+            <button class="toggle-btn" [class.active]="aracFormVerisi.musait" (click)="aracFormVerisi.musait = !aracFormVerisi.musait">
+              {{ aracFormVerisi.musait ? 'Evet' : 'Hayır' }}
             </button>
           </div>
         </div>
 
         <div class="modal-footer">
-          <button class="cancel-btn" (click)="formuKapat()">Vazgeç</button>
-          <button class="save-btn" (click)="formuKaydet()">
+          <button class="cancel-btn" (click)="aracFormuKapat()">Vazgeç</button>
+          <button class="save-btn" (click)="aracFormuKaydet()">
             <ion-icon name="checkmark-outline"></ion-icon>
-            {{ duzenleModu ? 'Güncelle' : 'Ekle' }}
+            {{ aracDuzenleModu ? 'Güncelle' : 'Ekle' }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-overlay" *ngIf="kullaniciFormAcik" (click)="kullaniciFormuKapat()">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h2>{{ kullaniciDuzenleModu ? 'Kullanıcıyı Düzenle' : 'Yeni Kullanıcı Ekle' }}</h2>
+          <button class="close-btn" (click)="kullaniciFormuKapat()">
+            <ion-icon name="close-outline"></ion-icon>
+          </button>
+        </div>
+
+        <div class="modal-body">
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" [(ngModel)]="kullaniciFormVerisi.email" placeholder="ornek@drivora.com" />
+          </div>
+          <div class="form-group">
+            <label>{{ kullaniciDuzenleModu ? 'Yeni Şifre (opsiyonel)' : 'Şifre' }}</label>
+            <input type="password" [(ngModel)]="kullaniciFormVerisi.sifre" placeholder="••••••••" />
+          </div>
+          <div class="form-group">
+            <label>Rol</label>
+            <select [(ngModel)]="kullaniciFormVerisi.rol">
+              <option *ngFor="let rol of roller" [value]="rol">{{ rol === 'admin' ? 'Yönetici' : 'Kullanıcı' }}</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="cancel-btn" (click)="kullaniciFormuKapat()">Vazgeç</button>
+          <button class="save-btn" (click)="kullaniciFormuKaydet()">
+            <ion-icon name="checkmark-outline"></ion-icon>
+            {{ kullaniciDuzenleModu ? 'Güncelle' : 'Ekle' }}
           </button>
         </div>
       </div>

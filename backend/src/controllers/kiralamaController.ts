@@ -99,3 +99,35 @@ export const kiralamaBitir = async (req: Request, res: Response) => {
     res.status(500).json({ hata: err.message });
   }
 };
+
+export const adminKiralamaListele = async (req: Request, res: Response) => {
+  try {
+    const durum = req.query.durum as string | undefined;
+    const params: any[] = [];
+    let whereClause = "";
+
+    if (durum) {
+      if (durum !== "aktif" && durum !== "tamamlandi") {
+        return res.status(400).json({ hata: "Geçersiz durum filtresi" });
+      }
+      whereClause = "WHERE k.durum = $1";
+      params.push(durum);
+    }
+
+    const result = await pool.query(
+      `SELECT k.id, k.kullanici_id, k.arac_id, k.baslangic_tarihi, k.bitis_tarihi, k.durum,
+              ku.email AS kullanici_email, ku.rol AS kullanici_rol,
+              a.marka, a.model, a.gunluk_fiyat
+       FROM kiralamalar k
+       JOIN kullanicilar ku ON ku.id = k.kullanici_id
+       JOIN araclar a ON a.id = k.arac_id
+       ${whereClause}
+       ORDER BY (k.durum = 'aktif') DESC, k.baslangic_tarihi DESC`,
+      params
+    );
+
+    res.json(result.rows);
+  } catch (err: any) {
+    res.status(500).json({ hata: err.message });
+  }
+};

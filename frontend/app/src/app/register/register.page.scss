@@ -30,14 +30,14 @@ ion-content {
     h1 {
       font-size: 28px;
       font-weight: 800;
-      color: var(--app-text);
+      color: #ffffff;
       margin: 0 0 8px 0;
       line-height: 1.2;
     }
 
     p {
       font-size: 13px;
-      color: var(--app-text-muted);
+      color: rgba(255, 255, 255, 0.85);
       margin: 0;
     }
   }
