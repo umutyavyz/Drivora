@@ -161,7 +161,7 @@ export const sifreDegistir = async (req: Request, res: Response) => {
     }
 
     if (result.rows[0].sifre !== mevcutSifre) {
-      return res.status(401).json({ hata: "Mevcut şifre yanlış" });
+      return res.status(400).json({ hata: "Mevcut şifre yanlış" });
     }
 
     await pool.query(
