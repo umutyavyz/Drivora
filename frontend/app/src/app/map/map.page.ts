@@ -2,16 +2,18 @@ import { Component, AfterViewInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { IonContent, IonSpinner, ToastController, AlertController } from '@ionic/angular/standalone';
+import { IonContent, IonIcon, IonSpinner, ToastController, AlertController } from '@ionic/angular/standalone';
 import * as L from 'leaflet';
 import { forkJoin } from 'rxjs';
+import { addIcons } from 'ionicons';
+import { cogOutline } from 'ionicons/icons';
 
 @Component({
   selector: 'app-map',
   templateUrl: './map.page.html',
   styleUrls: ['./map.page.scss'],
   standalone: true,
-  imports: [CommonModule, IonContent, IonSpinner],
+  imports: [CommonModule, IonContent, IonIcon, IonSpinner],
 })
 export class MapPage implements AfterViewInit, OnDestroy {
   map: any;
@@ -29,6 +31,9 @@ export class MapPage implements AfterViewInit, OnDestroy {
   rotaCizgisi: any = null;
   yuruyusDakika: number | null = null;
 
+  private tileKatmani: any = null;
+  private temaGozlemcisi: MutationObserver | null = null;
+
   // Simülasyon değişkenleri
   private simInterval: any = null;
   private simMarker: any = null;
@@ -45,7 +50,9 @@ export class MapPage implements AfterViewInit, OnDestroy {
     private toastCtrl: ToastController,
     private alertCtrl: AlertController,
     private router: Router
-  ) {}
+  ) {
+    addIcons({ cogOutline });
+  }
 
   detayaGit() {
     if (!this.seciliArac) return;
@@ -57,6 +64,10 @@ export class MapPage implements AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy() {
+    if (this.temaGozlemcisi) {
+      this.temaGozlemcisi.disconnect();
+      this.temaGozlemcisi = null;
+    }
     this.simulasyonDurdur();
   }
 
@@ -89,10 +100,15 @@ export class MapPage implements AfterViewInit, OnDestroy {
       zoomControl: false
     });
 
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-      attribution: '© OpenStreetMap © CARTO',
-      maxZoom: 19
-    }).addTo(this.map);
+    this.tileDegistir();
+
+    this.temaGozlemcisi = new MutationObserver(() => {
+      if (this.map) this.tileDegistir();
+    });
+    this.temaGozlemcisi.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class']
+    });
 
     const userIcon = L.divIcon({
       html: '<div style="width:20px;height:20px;background:var(--app-primary);border-radius:50%;border:3px solid var(--app-card-bg);box-shadow:0 0 0 4px rgba(74,158,255,0.3);"></div>',
@@ -188,9 +204,15 @@ export class MapPage implements AfterViewInit, OnDestroy {
           this.simulasyonBaslat();
         }
       },
-      error: (err) => {
-        console.log('Hata:', err);
+      error: async () => {
         this.yukleniyor = false;
+        const toast = await this.toastCtrl.create({
+          message: 'Veriler yüklenemedi. Backend çalışıyor mu?',
+          duration: 3000,
+          color: 'danger',
+          position: 'top'
+        });
+        await toast.present();
       }
     });
   }
@@ -383,6 +405,21 @@ export class MapPage implements AfterViewInit, OnDestroy {
       ]
     });
     await alert.present();
+  }
+
+  tileDegistir() {
+    const isDark = document.documentElement.classList.contains('ion-palette-dark');
+    const url = isDark
+      ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+      : 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
+
+    if (this.tileKatmani) {
+      this.map.removeLayer(this.tileKatmani);
+    }
+    this.tileKatmani = L.tileLayer(url, {
+      attribution: '© OpenStreetMap © CARTO',
+      maxZoom: 19
+    }).addTo(this.map);
   }
 
   // ─── Araç Simülasyonu ───────────────────────────────────

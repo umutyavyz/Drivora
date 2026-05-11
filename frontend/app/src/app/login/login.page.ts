@@ -38,19 +38,33 @@ export class LoginPage {
   }
 
   girisYap() {
+    if (!this.email.trim()) {
+      this.toastGoster('Email adresi zorunludur', 'warning');
+      return;
+    }
+    if (!this.email.includes('@')) {
+      this.toastGoster('Geçerli bir email adresi girin', 'warning');
+      return;
+    }
+    if (!this.sifre) {
+      this.toastGoster('Şifre zorunludur', 'warning');
+      return;
+    }
     this.http.post<any>('http://localhost:3000/kullanicilar/giris', {
-      email: this.email,
+      email: this.email.trim(),
       sifre: this.sifre
     }).subscribe({
       next: (res) => {
         localStorage.setItem('token', res.token);
         let isim = '';
+        let isAdmin = false;
         try {
           const decoded: any = jwtDecode(res.token);
           isim = decoded?.email ? decoded.email.split('@')[0] : '';
+          isAdmin = decoded?.rol === 'admin';
         } catch {}
         this.toastGoster(isim ? `Hoş geldin, ${isim}!` : 'Hoş geldin!', 'success');
-        this.router.navigate(['/tabs/map'], { replaceUrl: true });
+        this.router.navigate([isAdmin ? '/tabs/admin' : '/tabs/map'], { replaceUrl: true });
       },
       error: (err) => {
         this.toastGoster(err.error?.hata || 'Giriş başarısız', 'danger');

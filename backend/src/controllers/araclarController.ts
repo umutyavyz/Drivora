@@ -68,17 +68,25 @@ export const aracGuncelle = async (req: Request, res: Response) => {
 };
 
 export const aracSil = async (req: Request, res: Response) => {
+  const client = await pool.connect();
   try {
     const id = req.params.id;
-    const result = await pool.query(
+    await client.query('BEGIN');
+    await client.query("DELETE FROM kiralamalar WHERE arac_id = $1", [id]);
+    const result = await client.query(
       "DELETE FROM araclar WHERE id = $1 RETURNING *",
       [id]
     );
     if (result.rows.length === 0) {
+      await client.query('ROLLBACK');
       return res.status(404).json({ hata: "Araç bulunamadı" });
     }
+    await client.query('COMMIT');
     res.json({ mesaj: "Araç silindi", arac: result.rows[0] });
   } catch (err: any) {
+    await client.query('ROLLBACK');
     res.status(500).json({ hata: err.message });
+  } finally {
+    client.release();
   }
 };

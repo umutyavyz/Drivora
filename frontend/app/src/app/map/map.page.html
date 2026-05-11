@@ -1,4 +1,4 @@
-<ion-content [fullscreen]="true">
+<ion-content [fullscreen]="true" [scrollY]="false" [scrollX]="false">
   <div class="map-container">
     <div id="map"></div>
 
@@ -17,7 +17,7 @@
         </div>
         <div class="header-actions">
           <button class="locate-btn" (click)="kullaniciKonumunaGit()">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0a0a0a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg>
           </button>
         </div>
       </div>
@@ -73,7 +73,7 @@
             <span class="spec-text">{{ seciliArac.yakit }}</span>
           </div>
           <div class="spec" *ngIf="seciliArac.vites">
-            <svg class="spec-svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v8M12 15v8M4.22 4.22l5.66 5.66M14.12 14.12l5.66 5.66M1 12h8M15 12h8M4.22 19.78l5.66-5.66M14.12 9.88l5.66-5.66"/></svg>
+            <ion-icon name="cog-outline" class="spec-svg" style="width:14px;height:14px;color:var(--app-text-muted);"></ion-icon>
             <span class="spec-text">{{ seciliArac.vites }}</span>
           </div>
           <div class="spec" *ngIf="seciliArac.kategori">

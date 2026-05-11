@@ -1,7 +1,7 @@
 <ion-content [fullscreen]="true">
   
   <div class="search-bar">
-    <span class="search-icon">🔍</span>
+    <ion-icon name="search-outline" class="search-icon"></ion-icon>
     <input type="text" placeholder="Araç ara..." [(ngModel)]="aramaMetni"/>
   </div>
 
@@ -46,7 +46,7 @@
           <span class="dot"></span>
           {{ arac.musait ? 'Müsait' : 'Dolu' }}
         </div>
-        <button class="detail-btn" [disabled]="!arac.musait" (click)="detayaGit(arac)">
+        <button class="detail-btn" (click)="detayaGit(arac)">
           Detay →
         </button>
       </div>

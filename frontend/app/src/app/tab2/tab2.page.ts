@@ -41,6 +41,16 @@ export class Tab2Page implements OnInit, OnDestroy {
     this.kiralamalariGetir();
   }
 
+  private async toastGoster(mesaj: string, renk: string) {
+    const toast = await this.toastCtrl.create({
+      message: mesaj,
+      duration: 2200,
+      color: renk,
+      position: 'top'
+    });
+    await toast.present();
+  }
+
   sureMetni(baslangic: string, bitis?: string): string {
     const baslangicMs = new Date(baslangic).getTime();
     const bitisMs = bitis ? new Date(bitis).getTime() : this.simdi;
@@ -69,9 +79,15 @@ export class Tab2Page implements OnInit, OnDestroy {
         this.kiralamalar = data;
         this.yukleniyor = false;
       },
-      error: (err) => {
-        console.log('Hata:', err);
+      error: async () => {
         this.yukleniyor = false;
+        const toast = await this.toastCtrl.create({
+          message: 'Kiralamalar yüklenemedi. Backend çalışıyor mu?',
+          duration: 3000,
+          color: 'danger',
+          position: 'top'
+        });
+        await toast.present();
       }
     });
   }
@@ -98,24 +114,12 @@ export class Tab2Page implements OnInit, OnDestroy {
 
     this.http.put(`http://localhost:3000/kiralamalar/${kiralamaId}/bitir`, {}, { headers })
       .subscribe({
-        next: async () => {
-          const toast = await this.toastCtrl.create({
-            message: 'Kiralama bitirildi',
-            duration: 2000,
-            color: 'success',
-            position: 'top'
-          });
-          await toast.present();
+        next: () => {
           this.kiralamalariGetir();
+          this.toastGoster('Kiralama bitirildi', 'success');
         },
-        error: async () => {
-          const toast = await this.toastCtrl.create({
-            message: 'Bir hata oluştu',
-            duration: 2000,
-            color: 'danger',
-            position: 'top'
-          });
-          await toast.present();
+        error: () => {
+          this.toastGoster('Bir hata oluştu', 'danger');
         }
       });
   }

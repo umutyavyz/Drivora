@@ -17,6 +17,12 @@
       <input type="text" placeholder="Araç ara..." [(ngModel)]="aramaMetniArac" />
     </div>
 
+    <div class="durum-filtre" *ngIf="aktifSekme === 'araclar'">
+      <button class="filtre-btn" [class.active]="aracDurumFiltresi === 'hepsi'" (click)="aracDurumFiltresi = 'hepsi'">Hepsi</button>
+      <button class="filtre-btn musait" [class.active]="aracDurumFiltresi === 'musait'" (click)="aracDurumFiltresi = 'musait'">Müsait</button>
+      <button class="filtre-btn dolu" [class.active]="aracDurumFiltresi === 'dolu'" (click)="aracDurumFiltresi = 'dolu'">Dolu</button>
+    </div>
+
     <div class="search-bar" *ngIf="aktifSekme === 'kullanicilar'">
       <ion-icon name="search-outline" class="search-icon"></ion-icon>
       <input type="text" placeholder="Kullanıcı ara..." [(ngModel)]="aramaMetniKullanici" />
@@ -34,6 +40,10 @@
 
     <div class="arac-list" *ngIf="aktifSekme === 'araclar' && !yukleniyorAraclar">
       <div class="card" *ngFor="let arac of filtrelenmisAraclar()">
+        <div class="card-image" *ngIf="arac.resim_url">
+          <img [src]="arac.resim_url" [alt]="arac.marka + ' ' + arac.model" />
+          <div class="card-image-overlay"></div>
+        </div>
         <div class="card-top">
           <div>
             <p class="meta">#{{ arac.id }} · {{ arac.kategori || 'Kategori yok' }}</p>
@@ -76,7 +86,8 @@
         <div class="card-top">
           <div>
             <p class="meta">Kullanıcı #{{ kullanici.id }}</p>
-            <h3>{{ kullanici.email }}</h3>
+            <h3>{{ kullanici.ad_soyad || kullanici.email }}</h3>
+            <p class="meta" *ngIf="kullanici.ad_soyad">{{ kullanici.email }}</p>
             <div class="tag-row">
               <span class="tag role" [class.admin]="kullanici.rol === 'admin'">
                 {{ kullanici.rol === 'admin' ? 'Yönetici' : 'Kullanıcı' }}
@@ -230,6 +241,10 @@
         </div>
 
         <div class="modal-body">
+          <div class="form-group">
+            <label>Ad Soyad</label>
+            <input type="text" [(ngModel)]="kullaniciFormVerisi.ad_soyad" placeholder="Örn: Umut Yavuz" />
+          </div>
           <div class="form-group">
             <label>Email</label>
             <input type="email" [(ngModel)]="kullaniciFormVerisi.email" placeholder="ornek@drivora.com" />

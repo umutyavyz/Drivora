@@ -20,7 +20,7 @@ ion-content {
   left: 0;
   right: 0;
   z-index: 1000;
-  padding: var(--drivora-safe-top) 16px 16px;
+  padding: max(16px, calc(env(safe-area-inset-top) + 8px)) 16px 16px;
   pointer-events: none;
 
   .header-card {
@@ -84,13 +84,21 @@ ion-content {
       .locate-btn {
         width: 44px;
         height: 44px;
-        background: var(--app-card-bg);
+        background: var(--app-icon-bg);
         border: 1px solid var(--app-border);
         border-radius: 14px;
         display: flex;
         align-items: center;
         justify-content: center;
         cursor: pointer;
+        color: var(--app-text);
+        transition: background 0.2s ease, border-color 0.2s ease;
+
+        &:active {
+          background: rgba(74, 158, 255, 0.15);
+          border-color: rgba(74, 158, 255, 0.4);
+          color: #4a9eff;
+        }
       }
     }
   }
@@ -194,7 +202,7 @@ ion-content {
   background: var(--app-card-bg);
   border-top: 1px solid var(--app-border);
   border-radius: 24px 24px 0 0;
-  padding: 12px 20px calc(32px + var(--drivora-safe-bottom));
+  padding: 12px 20px calc(var(--ion-tab-bar-height, 56px) + var(--drivora-safe-bottom) + 8px);
   z-index: 1000;
   animation: slideUp 0.3s ease;
 

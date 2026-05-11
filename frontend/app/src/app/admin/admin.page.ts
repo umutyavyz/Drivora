@@ -42,6 +42,7 @@ interface Kullanici {
   id: number;
   email: string;
   rol: KullaniciRol;
+  ad_soyad?: string | null;
 }
 
 interface KiralamaKaydi {
@@ -82,6 +83,7 @@ export class AdminPage implements OnInit {
   aramaMetniArac = '';
   aramaMetniKullanici = '';
   aramaMetniKiralama = '';
+  aracDurumFiltresi: 'hepsi' | 'musait' | 'dolu' = 'hepsi';
 
   aracFormAcik = false;
   aracDuzenleModu = false;
@@ -101,6 +103,7 @@ export class AdminPage implements OnInit {
   kullaniciDuzenleModu = false;
   kullaniciFormVerisi: any = {
     id: null,
+    ad_soyad: '',
     email: '',
     sifre: '',
     rol: 'kullanici'
@@ -228,9 +231,15 @@ export class AdminPage implements OnInit {
   }
 
   filtrelenmisAraclar() {
-    if (!this.aramaMetniArac.trim()) return this.araclar;
+    let liste = this.araclar;
+    if (this.aracDurumFiltresi === 'musait') {
+      liste = liste.filter(a => a.musait);
+    } else if (this.aracDurumFiltresi === 'dolu') {
+      liste = liste.filter(a => !a.musait);
+    }
+    if (!this.aramaMetniArac.trim()) return liste;
     const arama = this.aramaMetniArac.toLowerCase();
-    return this.araclar.filter((a) =>
+    return liste.filter((a) =>
       a.marka?.toLowerCase().includes(arama) ||
       a.model?.toLowerCase().includes(arama) ||
       a.kategori?.toLowerCase().includes(arama)
@@ -292,34 +301,45 @@ export class AdminPage implements OnInit {
 
     if (this.aracDuzenleModu) {
       this.http.put(`${this.API_BASE}/araclar/${this.aracFormVerisi.id}`, body, { headers: this.getHeaders() }).subscribe({
-        next: async () => {
-          await this.toastGoster('Araç güncellendi', 'success');
+        next: () => {
           this.aracFormAcik = false;
           this.araclariGetir();
+          this.toastGoster('Araç güncellendi', 'success');
         },
-        error: async (err) => {
-          await this.toastGoster(err.error?.hata || 'Araç güncellenemedi', 'danger');
+        error: (err) => {
+          this.toastGoster(err.error?.hata || 'Araç güncellenemedi', 'danger');
         }
       });
       return;
     }
 
     this.http.post(`${this.API_BASE}/araclar`, body, { headers: this.getHeaders() }).subscribe({
-      next: async () => {
-        await this.toastGoster('Araç eklendi', 'success');
+      next: () => {
         this.aracFormAcik = false;
         this.araclariGetir();
+        this.toastGoster('Araç eklendi', 'success');
       },
-      error: async (err) => {
-        await this.toastGoster(err.error?.hata || 'Araç eklenemedi', 'danger');
+      error: (err) => {
+        this.toastGoster(err.error?.hata || 'Araç eklenemedi', 'danger');
       }
     });
   }
 
   async aracSil(arac: Arac) {
+    const aktifKiralama = this.kiralamalar.find(k => k.arac_id === arac.id && k.durum === 'aktif');
+
+    let mesaj: string;
+    if (aktifKiralama) {
+      mesaj = `Bu araç şu an "${aktifKiralama.kullanici_email}" kullanıcısında. Yine de silmek istediğinizden emin misiniz?`;
+    } else if (!arac.musait) {
+      mesaj = `Bu araç dolu gözüküyor ancak aktif kiralaması yok. Yine de silmek ister misiniz?`;
+    } else {
+      mesaj = `${arac.marka} ${arac.model} aracını silmek istediğine emin misin?`;
+    }
+
     const alert = await this.alertCtrl.create({
       header: 'Aracı Sil',
-      message: `${arac.marka} ${arac.model} aracını silmek istediğine emin misin?`,
+      message: mesaj,
       buttons: [
         { text: 'Vazgeç', role: 'cancel' },
         {
@@ -334,12 +354,12 @@ export class AdminPage implements OnInit {
 
   aracSilIstegiGonder(id: number) {
     this.http.delete(`${this.API_BASE}/araclar/${id}`, { headers: this.getHeaders() }).subscribe({
-      next: async () => {
-        await this.toastGoster('Araç silindi', 'success');
-        this.araclariGetir();
+      next: () => {
+        this.araclar = this.araclar.filter(a => a.id !== id);
+        this.toastGoster('Araç silindi', 'success');
       },
-      error: async (err) => {
-        await this.toastGoster(err.error?.hata || 'Araç silinemedi', 'danger');
+      error: (err) => {
+        this.toastGoster(err.error?.hata || 'Araç silinemedi', 'danger');
       }
     });
   }
@@ -381,6 +401,7 @@ export class AdminPage implements OnInit {
     this.kullaniciDuzenleModu = false;
     this.kullaniciFormVerisi = {
       id: null,
+      ad_soyad: '',
       email: '',
       sifre: '',
       rol: 'kullanici'
@@ -392,6 +413,7 @@ export class AdminPage implements OnInit {
     this.kullaniciDuzenleModu = true;
     this.kullaniciFormVerisi = {
       id: kullanici.id,
+      ad_soyad: kullanici.ad_soyad || '',
       email: kullanici.email,
       sifre: '',
       rol: kullanici.rol
@@ -418,31 +440,33 @@ export class AdminPage implements OnInit {
       return;
     }
 
+    const ad_soyad = this.kullaniciFormVerisi.ad_soyad?.trim() || null;
+
     if (this.kullaniciDuzenleModu) {
-      const body: any = { email, rol };
+      const body: any = { email, rol, ad_soyad };
       if (sifre) body.sifre = sifre;
 
       this.http.put(`${this.API_BASE}/kullanicilar/${this.kullaniciFormVerisi.id}`, body, { headers: this.getHeaders() }).subscribe({
-        next: async () => {
-          await this.toastGoster('Kullanıcı güncellendi', 'success');
+        next: () => {
           this.kullaniciFormAcik = false;
           this.kullanicilariGetir();
+          this.toastGoster('Kullanıcı güncellendi', 'success');
         },
-        error: async (err) => {
-          await this.toastGoster(err.error?.hata || 'Kullanıcı güncellenemedi', 'danger');
+        error: (err) => {
+          this.toastGoster(err.error?.hata || 'Kullanıcı güncellenemedi', 'danger');
         }
       });
       return;
     }
 
-    this.http.post(`${this.API_BASE}/kullanicilar`, { email, sifre, rol }, { headers: this.getHeaders() }).subscribe({
-      next: async () => {
-        await this.toastGoster('Kullanıcı eklendi', 'success');
+    this.http.post(`${this.API_BASE}/kullanicilar`, { email, sifre, rol, ad_soyad }, { headers: this.getHeaders() }).subscribe({
+      next: () => {
         this.kullaniciFormAcik = false;
         this.kullanicilariGetir();
+        this.toastGoster('Kullanıcı eklendi', 'success');
       },
-      error: async (err) => {
-        await this.toastGoster(err.error?.hata || 'Kullanıcı eklenemedi', 'danger');
+      error: (err) => {
+        this.toastGoster(err.error?.hata || 'Kullanıcı eklenemedi', 'danger');
       }
     });
   }
@@ -465,12 +489,12 @@ export class AdminPage implements OnInit {
 
   kullaniciSilIstegiGonder(id: number) {
     this.http.delete(`${this.API_BASE}/kullanicilar/${id}`, { headers: this.getHeaders() }).subscribe({
-      next: async () => {
-        await this.toastGoster('Kullanıcı silindi', 'success');
-        this.kullanicilariGetir();
+      next: () => {
+        this.kullanicilar = this.kullanicilar.filter(k => k.id !== id);
+        this.toastGoster('Kullanıcı silindi', 'success');
       },
-      error: async (err) => {
-        await this.toastGoster(err.error?.hata || 'Kullanıcı silinemedi', 'danger');
+      error: (err) => {
+        this.toastGoster(err.error?.hata || 'Kullanıcı silinemedi', 'danger');
       }
     });
   }

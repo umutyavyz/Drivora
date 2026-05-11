@@ -12,6 +12,7 @@ import { Router } from '@angular/router';
   imports: [IonContent, FormsModule],
 })
 export class RegisterPage {
+  adSoyad = '';
   email = '';
   sifre = '';
   sifreTekrar = '';
@@ -33,8 +34,33 @@ export class RegisterPage {
   }
 
   kayitOl() {
-    if (!this.email || !this.sifre) {
-      this.toastGoster('Tüm alanları doldurun', 'warning');
+    if (!this.adSoyad.trim()) {
+      this.toastGoster('Ad soyad zorunludur', 'warning');
+      return;
+    }
+
+    if (!this.email.trim()) {
+      this.toastGoster('Email adresi zorunludur', 'warning');
+      return;
+    }
+
+    if (!this.email.includes('@')) {
+      this.toastGoster('Geçerli bir email adresi girin', 'warning');
+      return;
+    }
+
+    if (!this.sifre) {
+      this.toastGoster('Şifre zorunludur', 'warning');
+      return;
+    }
+
+    if (this.sifre.length < 6) {
+      this.toastGoster('Şifre en az 6 karakter olmalıdır', 'warning');
+      return;
+    }
+
+    if (!this.sifreTekrar) {
+      this.toastGoster('Şifre tekrar zorunludur', 'warning');
       return;
     }
 
@@ -44,8 +70,9 @@ export class RegisterPage {
     }
 
     this.http.post<any>('http://localhost:3000/kullanicilar/kayit', {
-      email: this.email,
-      sifre: this.sifre
+      email: this.email.trim(),
+      sifre: this.sifre,
+      ad_soyad: this.adSoyad.trim()
     }).subscribe({
       next: () => {
         this.otomatikGirisYap();
@@ -63,7 +90,7 @@ export class RegisterPage {
     }).subscribe({
       next: (res) => {
         localStorage.setItem('token', res.token);
-        this.toastGoster('Hoş geldin! 🎉', 'success');
+        this.toastGoster('Hoş geldin!', 'success');
         this.router.navigate(['/tabs/map'], { replaceUrl: true });
       },
       error: () => {

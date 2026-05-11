@@ -1,13 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { IonContent, IonHeader, IonToolbar, IonTitle } from '@ionic/angular/standalone';
+import { IonContent } from '@ionic/angular/standalone';
 
 @Component({
   selector: 'app-welcome',
   templateUrl: './welcome.page.html',
   styleUrls: ['./welcome.page.scss'],
   standalone: true,
-  imports: [IonTitle, IonToolbar, IonHeader, IonContent],
+  imports: [IonContent],
 })
 export class WelcomePage implements OnInit {
   constructor(private router: Router) {}
@@ -20,7 +20,7 @@ export class WelcomePage implements OnInit {
   }
 
   basla() {
-    this.router.navigate(['/login']);
+    this.router.navigate(['/register']);
   }
 
   girisYap() {

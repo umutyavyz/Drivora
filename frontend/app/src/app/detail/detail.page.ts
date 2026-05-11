@@ -4,7 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { IonContent, IonIcon, IonSpinner, ToastController } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { carOutline } from 'ionicons/icons';
+import { carOutline, cogOutline } from 'ionicons/icons';
 
 @Component({
   selector: 'app-detail',
@@ -24,7 +24,7 @@ export class DetailPage implements OnInit {
     private http: HttpClient,
     private toastCtrl: ToastController
   ) {
-    addIcons({ carOutline });
+    addIcons({ carOutline, cogOutline });
   }
 
   ngOnInit() {
@@ -86,7 +86,7 @@ export class DetailPage implements OnInit {
       .subscribe({
         next: async () => {
           const toast = await this.toastCtrl.create({
-            message: `${this.arac.marka} ${this.arac.model} kiralandı! 🚗`,
+            message: `${this.arac.marka} ${this.arac.model} kiralandı!`,
             duration: 2500,
             color: 'success',
             position: 'top'

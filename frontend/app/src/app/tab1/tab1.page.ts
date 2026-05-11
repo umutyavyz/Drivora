@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { IonContent, IonIcon, IonSpinner } from '@ionic/angular/standalone';
+import { IonContent, IonIcon, IonSpinner, ToastController } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { carOutline, searchOutline } from 'ionicons/icons';
 
@@ -25,7 +25,7 @@ export class Tab1Page implements OnInit {
   aktifKiralamaAracId: number | null = null;
   yukleniyor = true;
 
-  constructor(private http: HttpClient, private router: Router) {
+  constructor(private http: HttpClient, private router: Router, private toastCtrl: ToastController) {
     addIcons({ carOutline, searchOutline });
   }
 
@@ -52,9 +52,15 @@ export class Tab1Page implements OnInit {
         this.araclar = data;
         this.yukleniyor = false;
       },
-      error: (err) => {
-        console.log('Hata:', err);
+      error: async () => {
         this.yukleniyor = false;
+        const toast = await this.toastCtrl.create({
+          message: 'Araçlar yüklenemedi. Backend çalışıyor mu?',
+          duration: 3000,
+          color: 'danger',
+          position: 'top'
+        });
+        await toast.present();
       }
     });
   }

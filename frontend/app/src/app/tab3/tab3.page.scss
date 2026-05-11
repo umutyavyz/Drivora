@@ -78,7 +78,13 @@ ion-content {
     font-size: 18px;
     font-weight: 700;
     color: var(--app-text);
-    margin: 0 0 8px 0;
+    margin: 0 0 4px 0;
+  }
+
+  .user-email {
+    font-size: 13px;
+    color: var(--app-text-muted);
+    margin: 0 0 10px 0;
   }
 
   .role-tag {
@@ -146,6 +152,85 @@ ion-content {
         font-weight: 500;
       }
     }
+  }
+}
+
+.sifre-karti {
+  margin-bottom: 24px;
+
+  .section-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--app-text-muted);
+    margin: 0 0 12px 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+}
+
+.sifre-form {
+  background: var(--app-card-bg);
+  border: 1px solid var(--app-border);
+  border-radius: 20px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.sifre-input-group {
+  label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--app-text-muted);
+    letter-spacing: 0.8px;
+    margin-bottom: 8px;
+  }
+}
+
+.sifre-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid var(--app-border);
+  padding-bottom: 10px;
+
+  .sifre-icon {
+    font-size: 18px;
+    color: var(--app-text-muted);
+    flex-shrink: 0;
+  }
+
+  input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--app-text);
+    font-size: 15px;
+
+    &::placeholder {
+      color: var(--app-text-muted);
+    }
+  }
+}
+
+.sifre-kaydet-btn {
+  width: 100%;
+  background: linear-gradient(135deg, #4a9eff, #6c63ff);
+  color: #ffffff;
+  border: none;
+  border-radius: 14px;
+  padding: 14px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 4px;
+  transition: transform 0.15s ease;
+
+  &:active {
+    transform: scale(0.98);
   }
 }
 
