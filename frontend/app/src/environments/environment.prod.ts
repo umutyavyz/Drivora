@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  API_BASE: `https://${window.location.hostname}:3000`
+  API_BASE: 'https://drivora-production-9bca.up.railway.app'
 };
