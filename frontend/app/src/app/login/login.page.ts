@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { environment } from '../../environments/environment';
-import { IonContent, IonIcon, ToastController } from '@ionic/angular/standalone';
+import { IonContent, IonIcon, ToastController, NavController } from '@ionic/angular/standalone';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
@@ -25,7 +25,8 @@ export class LoginPage {
   constructor(
     private http: HttpClient,
     private router: Router,
-    private toastCtrl: ToastController
+    private toastCtrl: ToastController,
+    private navCtrl: NavController
   ) {}
 
   async toastGoster(mesaj: string, renk: string) {
@@ -65,7 +66,10 @@ export class LoginPage {
           isAdmin = decoded?.rol === 'admin';
         } catch {}
         this.toastGoster(isim ? `Hoş geldin, ${isim}!` : 'Hoş geldin!', 'success');
-        this.router.navigate([isAdmin ? '/tabs/admin' : '/tabs/map'], { replaceUrl: true });
+        // navigateRoot, önceki oturumdan kalan ion-router-outlet view stack'ini
+        // temizleyerek yeni oturumu sıfırdan başlatır (örn. kullanıcı çıkışından
+        // sonra admin girişinde eski sayfaların cache'lenip hata vermesini önler).
+        this.navCtrl.navigateRoot([isAdmin ? '/tabs/admin' : '/tabs/map']);
       },
       error: (err) => {
         this.toastGoster(err.error?.hata || 'Giriş başarısız', 'danger');

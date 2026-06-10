@@ -4,7 +4,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { IonContent, IonIcon, IonSpinner, ToastController, AlertController } from '@ionic/angular/standalone';
+import { IonContent, IonIcon, IonSpinner, ToastController, AlertController, NavController } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
@@ -87,7 +87,8 @@ export class AdminPage implements OnInit, OnDestroy {
   isAdmin = false;
   aktifSekme: AdminSekme = 'araclar';
   aktifKiralamaSekmesi: KiralamaSekmesi = 'aktif';
-  altSekme: AltSekme = 'panel';
+  // Admin giriş yaptığında varsayılan ekran istatistikler olsun.
+  altSekme: AltSekme = 'istatistik';
   adminEmail = '';
   adminAd = '';
   adminTokenExp: Date | null = null;
@@ -148,7 +149,8 @@ export class AdminPage implements OnInit, OnDestroy {
     private http: HttpClient,
     private router: Router,
     private toastCtrl: ToastController,
-    private alertCtrl: AlertController
+    private alertCtrl: AlertController,
+    private navCtrl: NavController
   ) {
     addIcons({
       addOutline, barChartOutline, carOutline, cashOutline, checkmarkOutline,
@@ -259,7 +261,7 @@ export class AdminPage implements OnInit, OnDestroy {
 
   cikisYap() {
     localStorage.removeItem('token');
-    this.router.navigate(['/login']);
+    this.navCtrl.navigateRoot(['/login']);
   }
 
   private async toastGoster(message: string, color: 'success' | 'danger' | 'warning', duration = 2200) {

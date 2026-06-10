@@ -2,11 +2,20 @@
 // `ng build` replaces `environment.ts` with `environment.prod.ts`.
 // The list of file replacements can be found in `angular.json`.
 
+import { Capacitor } from '@capacitor/core';
+
+// Native (iOS/Android) derlemede cihazın WebView'i `capacitor://localhost`
+// üzerinden çalışır; bu yüzden `localhost:3000` telefonun KENDİSİNE gider ve
+// backend bulunmaz (ayrıca iOS ATS düz http'yi engeller). Bu yüzden native'de
+// yayınlanmış Railway backend'ine (HTTPS) bağlanıyoruz.
+// Tarayıcıda (web dev) ise her zamanki gibi yerel backend'e (localhost:3000) git.
+const RAILWAY_API = 'https://drivora-production-9bca.up.railway.app';
+
 export const environment = {
   production: false,
-  // Telefondan test için bilgisayarın yerel IP adresini kullan
-  // Sadece bilgisayardan test ediyorsan 'localhost' olarak değiştirebilirsin
-  API_BASE: `https://${window.location.hostname}:3000`
+  API_BASE: Capacitor.isNativePlatform()
+    ? RAILWAY_API
+    : `http://${window.location.hostname}:3000`
 };
 
 /*

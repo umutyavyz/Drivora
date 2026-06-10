@@ -300,3 +300,48 @@ ion-content {
     flex-direction: column;
   }
 }
+
+/* iPhone SE (2./3. nesil – 375×667) ve benzeri kısa ekranlar:
+   ekrana sığması için divleri belirgin şekilde kompaktlaştır. */
+@media (max-width: 390px) and (max-height: 700px) {
+  .hero-section {
+    height: 180px;
+
+    .hero-overlay {
+      bottom: 14px;
+      left: 20px;
+      right: 20px;
+
+      h1 { font-size: 22px; margin-bottom: 4px; }
+      p { font-size: 12px; line-height: 1.35; }
+    }
+  }
+
+  .form-section { padding: 16px 20px 20px; }
+
+  .brand {
+    margin-bottom: 16px;
+
+    .brand-name { font-size: 12px; margin-bottom: 3px; }
+    h2 { font-size: 21px; }
+  }
+
+  .input-group {
+    margin-bottom: 13px;
+
+    label { margin-bottom: 5px; }
+    input { font-size: 15px; padding: 7px 0; }
+  }
+
+  .login-btn {
+    padding: 13px;
+    margin-top: 2px;
+    margin-bottom: 14px;
+  }
+
+  .register-text { margin-bottom: 12px; }
+
+  .divider { margin-bottom: 12px; }
+
+  .social-row .social-btn { padding: 11px; font-size: 13px; }
+}

@@ -49,6 +49,7 @@ export class MapPage implements AfterViewInit, OnDestroy {
   userMarker: any = null;
   rotaCizgisi: any = null;
   yuruyusDakika: number | null = null;
+  durumMetni: string = '';
 
   // Bottom-sheet aşağı sürükleyerek kapatma
   sheetKaydirma = 0;            // anlık translateY (px)

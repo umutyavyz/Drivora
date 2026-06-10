@@ -3,7 +3,7 @@ import { environment } from '../../environments/environment';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
-import { IonContent, IonIcon, AlertController, IonSegment, IonSegmentButton, ToastController } from '@ionic/angular/standalone';
+import { IonContent, IonIcon, AlertController, IonSegment, IonSegmentButton, ToastController, NavController } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { FormsModule } from '@angular/forms';
 import {
@@ -45,7 +45,8 @@ export class ProfilPage implements OnInit {
     private http: HttpClient,
     private alertCtrl: AlertController,
     private toastCtrl: ToastController,
-    private themeService: ThemeService
+    private themeService: ThemeService,
+    private navCtrl: NavController
   ) {
     addIcons({
       mailOutline, shieldOutline, timeOutline,
@@ -175,7 +176,10 @@ export class ProfilPage implements OnInit {
           role: 'destructive',
           handler: () => {
             localStorage.removeItem('token');
-            this.router.navigate(['/login'], { replaceUrl: true });
+            // navigateRoot, tüm sekme/sayfa view stack'ini temizler; böylece
+            // sonraki giriş (özellikle farklı rol ile) eski cache'lenmiş
+            // sayfaları devralmaz.
+            this.navCtrl.navigateRoot(['/login']);
           }
         }
       ]

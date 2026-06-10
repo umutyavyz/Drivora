@@ -160,3 +160,43 @@ ion-content {
 
   .form-section { padding: 24px 20px; }
 }
+
+/* iPhone SE (2./3. nesil – 375×667) ve benzeri kısa ekranlar:
+   kayıt formu 6 alandan oluştuğu için divleri ekrana sığacak şekilde
+   belirgin biçimde kompaktlaştır. */
+@media (max-width: 390px) and (max-height: 700px) {
+  .hero-section {
+    height: 130px;
+
+    .hero-overlay {
+      bottom: 14px;
+      left: 20px;
+      right: 20px;
+
+      h1 { font-size: 20px; margin-bottom: 4px; line-height: 1.1; }
+      p { font-size: 12px; }
+    }
+  }
+
+  .form-section { padding: 16px 20px; }
+
+  .brand {
+    margin-bottom: 14px;
+
+    p { font-size: 12px; margin-bottom: 2px; }
+    h2 { font-size: 21px; }
+  }
+
+  .input-group {
+    margin-bottom: 11px;
+
+    label { margin-bottom: 4px; }
+    input { font-size: 15px; padding: 6px 0; }
+  }
+
+  .register-btn {
+    padding: 12px;
+    margin-top: 4px;
+    margin-bottom: 12px;
+  }
+}
