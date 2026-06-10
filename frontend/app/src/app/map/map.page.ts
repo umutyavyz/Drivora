@@ -1,9 +1,10 @@
-import { Component, AfterViewInit, OnDestroy } from '@angular/core';
+import { Component, AfterViewInit, OnDestroy, NgZone } from '@angular/core';
 import { environment } from '../../environments/environment';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { IonContent, IonIcon, IonSpinner, ToastController, AlertController } from '@ionic/angular/standalone';
+import './leaflet-cluster.setup'; // window.L'i set eder — markercluster'dan ÖNCE olmalı
 import * as L from 'leaflet';
 import 'leaflet.markercluster';
 import { forkJoin, timeout } from 'rxjs';
@@ -109,7 +110,8 @@ export class MapPage implements AfterViewInit, OnDestroy {
     private http: HttpClient,
     private toastCtrl: ToastController,
     private router: Router,
-    private alertCtrl: AlertController
+    private alertCtrl: AlertController,
+    private ngZone: NgZone
   ) {
     addIcons({ cogOutline, checkmarkCircleOutline, closeCircleOutline });
   }
@@ -165,6 +167,22 @@ export class MapPage implements AfterViewInit, OnDestroy {
     this.sureSayaciniDurdur();
   }
 
+  // Ionic sekme/sayfa geçişi tamamlanınca tetiklenir. Harita, container'ın
+  // boyutu tam belli olmadan oluşturulduğunda bazı tile'lar yüklenmez ve
+  // beyaz alanlar kalır; burada boyutu yeniden ölçtürerek bunu gideririz.
+  ionViewDidEnter() {
+    this.haritaBoyutTazele();
+  }
+
+  // invalidateSize'ı birkaç kez gecikmeli çağırır: hem ilk yerleşimi hem de
+  // Ionic geçiş animasyonunun (~300ms) bitişini yakalar.
+  private haritaBoyutTazele() {
+    if (!this.map) return;
+    [0, 150, 400, 800].forEach(ms =>
+      setTimeout(() => this.map?.invalidateSize(), ms)
+    );
+  }
+
   // Konumu arka planda alır; tüm akış 8 sn'lik bir yarışa sarılır ki
   // native izin/konum çağrısı takılsa bile uygulama kilitlenmesin.
   private async konumGuncelle() {
@@ -216,6 +234,9 @@ export class MapPage implements AfterViewInit, OnDestroy {
     this.userMarker = L.marker([this.kullaniciKonumu.lat, this.kullaniciKonumu.lng], { icon: userIcon })
       .addTo(this.map)
       .bindPopup('Konumunuz');
+
+    // İlk yerleşim sonrası tile'ların eksik kalmaması için boyutu tazele.
+    this.haritaBoyutTazele();
   }
 
   // İki nokta arası mesafe (metre cinsinden)
@@ -258,10 +279,23 @@ export class MapPage implements AfterViewInit, OnDestroy {
       kiralamalar: this.http.get<any[]>(`${environment.API_BASE}/kiralamalar`),
       araclar: this.http.get<any[]>(`${environment.API_BASE}/araclar`)
     }).pipe(timeout(15000)).subscribe({
-      next: async (sonuclar) => {
+      // CapacitorHttp yanıtları Angular zone'u dışında dönebildiği için sonuç
+      // işlemeyi ngZone.run ile sarıyoruz; aksi halde yukleniyor=false ekrana
+      // yansımaz ve spinner sonsuza kadar döner.
+      next: (sonuclar) => this.ngZone.run(async () => {
         await this.yuklemToast?.dismiss().catch(() => {});
+       try {
         const kiralamalar = sonuclar.kiralamalar;
         const data = sonuclar.araclar;
+
+        // TANI: yanıt beklenen dizi değilse (ör. 401 gövdesi {hata:...}),
+        // data.map patlamadan önce gerçek yanıtı ekrana yaz.
+        if (!Array.isArray(data) || !Array.isArray(kiralamalar)) {
+          this.yukleniyor = false;
+          this.aracHataTani =
+            `Beklenmeyen yanıt · araclar=${JSON.stringify(sonuclar.araclar)?.slice(0,120)} · kiralamalar=${JSON.stringify(sonuclar.kiralamalar)?.slice(0,120)}`;
+          return;
+        }
 
         const aktif = kiralamalar.find(k => k.durum === 'aktif');
         this.aktifKiralamaAracId = aktif ? aktif.arac_id : null;
@@ -335,17 +369,23 @@ export class MapPage implements AfterViewInit, OnDestroy {
         if (this.aktifKiralamaAracId) {
           this.simulasyonBaslat();
         }
-      },
-      error: async (err) => {
+       } catch (e: any) {
+        // Yanıt işlenirken bir exception olursa spinner sonsuza kalmasın;
+        // gerçek hatayı ekrana yaz.
+        this.yukleniyor = false;
+        this.aracHataTani = `İşleme hatası: ${e?.message || e}`;
+       }
+      }),
+      error: (err) => this.ngZone.run(async () => {
         await this.yuklemToast?.dismiss().catch(() => {});
         this.yukleniyor = false;
         // EKRAN TANISI: cihazdaki gerçek hatayı görünür kıl
         const durum = err?.status ?? '?';
         const mesaj = err?.name === 'TimeoutError'
-          ? 'TIMEOUT (45s) — yanıt gelmedi'
+          ? 'TIMEOUT (15s) — yanıt gelmedi'
           : (err?.message || err?.statusText || 'bilinmeyen');
         this.aracHataTani = `Hata: HTTP ${durum} · ${mesaj} · URL: ${environment.API_BASE}`;
-      }
+      })
     });
   }
 
@@ -424,18 +464,23 @@ export class MapPage implements AfterViewInit, OnDestroy {
         <path d="M5 11L6.5 6.5C6.78 5.61 7.61 5 8.55 5H15.45C16.39 5 17.22 5.61 17.5 6.5L19 11M5 11H19M5 11V17C5 17.55 5.45 18 6 18H7C7.55 18 8 17.55 8 17V16H16V17C16 17.55 16.45 18 17 18H18C18.55 18 19 17.55 19 17V11M7.5 14C8.05 14 8.5 13.55 8.5 13C8.5 12.45 8.05 12 7.5 12C6.95 12 6.5 12.45 6.5 13C6.5 13.55 6.95 14 7.5 14ZM16.5 14C17.05 14 17.5 13.55 17.5 13C17.5 12.45 17.05 12 16.5 12C15.95 12 15.5 12.45 15.5 13C15.5 13.55 15.95 14 16.5 14Z" stroke="${strokeColor}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>`;
 
-    // Cluster group: benim aracım için devre dışı, diğerleri cluster'lanır
-    this.clusterGroup = (L as any).markerClusterGroup({
-      maxClusterRadius: 55,
-      iconCreateFunction: (cluster: any) => {
-        const count = cluster.getChildCount();
-        return L.divIcon({
-          html: `<div class="drv-cluster"><span>${count}</span></div>`,
-          className: '',
-          iconSize: [44, 44]
-        });
-      }
-    });
+    // Cluster group: benim aracım için devre dışı, diğerleri cluster'lanır.
+    // markercluster eklentisi yüklenememişse (clusterDestekli=false) marker'lar
+    // doğrudan haritaya eklenir; harita yine de çalışır.
+    const clusterDestekli = typeof (L as any).markerClusterGroup === 'function';
+    this.clusterGroup = clusterDestekli
+      ? (L as any).markerClusterGroup({
+          maxClusterRadius: 55,
+          iconCreateFunction: (cluster: any) => {
+            const count = cluster.getChildCount();
+            return L.divIcon({
+              html: `<div class="drv-cluster"><span>${count}</span></div>`,
+              className: '',
+              iconSize: [44, 44]
+            });
+          }
+        })
+      : null;
 
     this.yakindakiAraclar.forEach(arac => {
       if (this.simAktif && arac.id === this.aktifKiralamaAracId) return;
@@ -457,8 +502,8 @@ export class MapPage implements AfterViewInit, OnDestroy {
       const marker = L.marker([arac.latitude, arac.longitude], { icon: aracIcon });
       marker.on('click', () => this.aracSec(arac));
 
-      if (benimAracim) {
-        marker.addTo(this.map); // Benim aracım direkt haritaya (cluster dışı)
+      if (benimAracim || !this.clusterGroup) {
+        marker.addTo(this.map); // Benim aracım (veya cluster yoksa hepsi) direkt haritaya
       } else {
         this.clusterGroup.addLayer(marker);
       }
@@ -466,7 +511,7 @@ export class MapPage implements AfterViewInit, OnDestroy {
       this.markerlar.push(marker);
     });
 
-    this.map.addLayer(this.clusterGroup);
+    if (this.clusterGroup) this.map.addLayer(this.clusterGroup);
   }
 
   kullaniciKonumunaGit() {

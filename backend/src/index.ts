@@ -13,6 +13,7 @@ import odemelerRouter from "./routes/odemeler";
 import kartlarRouter from "./routes/kartlar";
 import favorilerRouter from "./routes/favoriler";
 import degerlendirmelerRouter from "./routes/degerlendirmeler";
+import { emailDogrulaSayfa, sifreSifirlaSayfa } from "./controllers/authPagesController";
 
 const app = express();
 const PORT = Number(process.env.PORT) || 3000;
@@ -61,6 +62,12 @@ app.use(
 );
 
 app.use(express.json());
+
+// E-postadaki linkler doğrudan backend'e gelir; bu sayfalar kendi içinde HTML
+// döner (frontend barındırmaya gerek yok). FRONTEND_URL backend adresine işaret
+// ettiğinde link'ler bu uçlara düşer.
+app.get("/email-dogrula", emailDogrulaSayfa);
+app.get("/sifre-sifirla", sifreSifirlaSayfa);
 
 app.use("/araclar", araclarRouter);
 app.use("/kullanicilar", kullanicilarRouter);
