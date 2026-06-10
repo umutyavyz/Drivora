@@ -1,4 +1,8 @@
 <ion-content [fullscreen]="true" [scrollY]="false" [scrollX]="false">
+  <!-- GEÇİCİ TANI BANNER'I: her durumda görünür, yeni kodun çalıştığını ve istek durumunu gösterir -->
+  <div style="position:fixed;top:0;left:0;right:0;z-index:99999;background:#000;color:#0f0;font-size:11px;font-family:monospace;padding:6px 10px;word-break:break-word;line-height:1.4;">
+    DBG v3 · {{ durumMetni }}
+  </div>
   <div class="map-container">
     <div id="map"></div>
 
@@ -86,6 +90,12 @@
 
     <div class="map-loading" *ngIf="yukleniyor">
       <ion-spinner name="crescent"></ion-spinner>
+    </div>
+
+    <!-- TANI: araç yüklenemezse ekranda gerçek hatayı göster -->
+    <div class="map-loading" *ngIf="!yukleniyor && aracHataTani" style="flex-direction:column;gap:16px;padding:24px;text-align:center;">
+      <p style="color:#fff;font-size:13px;line-height:1.5;max-width:320px;word-break:break-word;background:rgba(0,0,0,0.7);padding:14px;border-radius:12px;">{{ aracHataTani }}</p>
+      <button (click)="araclariGetir()" style="background:#4a9eff;color:#fff;border:none;padding:12px 28px;border-radius:12px;font-size:15px;font-weight:700;">Tekrar Dene</button>
     </div>
 
     <div class="bottom-sheet" *ngIf="seciliArac"

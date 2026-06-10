@@ -52,7 +52,7 @@ const yerelVeyaLanMi = (origin: string): boolean => {
 app.use(
   cors({
     origin: (origin, cb) => {
-      if (!origin || izinliKaynaklar.includes(origin) || yerelVeyaLanMi(origin)) {
+      if (!origin || origin === 'null' || origin === 'capacitor://localhost' || origin === 'ionic://localhost' || izinliKaynaklar.includes(origin) || yerelVeyaLanMi(origin)) {
         return cb(null, true);
       }
       return cb(new Error(`CORS engellendi: ${origin}`));

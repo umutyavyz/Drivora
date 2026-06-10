@@ -142,9 +142,14 @@ export class MapPage implements AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit() {
+    // Harita başlatma cihazda hata verse bile araç yüklemesi çalışsın.
+    try {
+      this.haritayiBaslat();
+    } catch (e) {
+      console.error('Harita başlatma hatası:', e);
+    }
     // Araçları HEMEN yükle (varsayılan konumla). Konum almayı bekleme —
     // native konum çağrısı cihazda takılırsa araçlar hiç yüklenmesin diye.
-    this.haritayiBaslat();
     this.araclariGetir();
     // Gerçek konumu arka planda al; gelirse haritayı yeniden ortala.
     this.konumGuncelle();
@@ -232,8 +237,11 @@ export class MapPage implements AfterViewInit, OnDestroy {
 
   private yuklemToast: any = null;
 
+  aracHataTani = '';
+
   async araclariGetir() {
     this.yukleniyor = true;
+    this.aracHataTani = '';
 
     // Varsa eski toast'ı kapat (çift çağrıda üst üste binmesin)
     await this.yuklemToast?.dismiss().catch(() => {});
@@ -248,9 +256,9 @@ export class MapPage implements AfterViewInit, OnDestroy {
     forkJoin({
       kiralamalar: this.http.get<any[]>(`${environment.API_BASE}/kiralamalar`),
       araclar: this.http.get<any[]>(`${environment.API_BASE}/araclar`)
-    }).pipe(timeout(45000)).subscribe({
+    }).pipe(timeout(15000)).subscribe({
       next: async (sonuclar) => {
-        await this.yuklemToast?.dismiss();
+        await this.yuklemToast?.dismiss().catch(() => {});
         const kiralamalar = sonuclar.kiralamalar;
         const data = sonuclar.araclar;
 
@@ -313,24 +321,29 @@ export class MapPage implements AfterViewInit, OnDestroy {
           ...Array.from(kasaSet).filter(k => !this.KASA_SIRASI.includes(k))
         ];
 
-        this.filtreUygula();
+        // Veri işlendi: spinner'ı KAPAT (harita render'ından önce) ki
+        // olası bir harita/marker hatası spinner'ı sonsuza kilitlemesin.
         this.yukleniyor = false;
+        try {
+          this.filtreUygula();
+        } catch (e) {
+          console.error('Harita render hatası:', e);
+        }
 
         // Aktif kiralama varsa simülasyonu başlat
         if (this.aktifKiralamaAracId) {
           this.simulasyonBaslat();
         }
       },
-      error: async () => {
-        await this.yuklemToast?.dismiss();
+      error: async (err) => {
+        await this.yuklemToast?.dismiss().catch(() => {});
         this.yukleniyor = false;
-        const toast = await this.toastCtrl.create({
-          message: 'Veriler yüklenemedi. Bağlantını kontrol et.',
-          duration: 3000,
-          color: 'danger',
-          position: 'top'
-        });
-        await toast.present();
+        // EKRAN TANISI: cihazdaki gerçek hatayı görünür kıl
+        const durum = err?.status ?? '?';
+        const mesaj = err?.name === 'TimeoutError'
+          ? 'TIMEOUT (45s) — yanıt gelmedi'
+          : (err?.message || err?.statusText || 'bilinmeyen');
+        this.aracHataTani = `Hata: HTTP ${durum} · ${mesaj} · URL: ${environment.API_BASE}`;
       }
     });
   }
@@ -390,6 +403,8 @@ export class MapPage implements AfterViewInit, OnDestroy {
   }
 
   araclariHaritayaEkle() {
+    // Harita henüz hazır değilse marker ekleme — veri yine de yüklü kalır.
+    if (!this.map) return;
     // Eski cluster group'u kaldır
     if (this.clusterGroup && this.map) {
       this.map.removeLayer(this.clusterGroup);
