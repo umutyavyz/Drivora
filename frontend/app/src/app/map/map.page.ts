@@ -142,7 +142,12 @@ export class MapPage implements AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit() {
-    this.konumAl();
+    // Araçları HEMEN yükle (varsayılan konumla). Konum almayı bekleme —
+    // native konum çağrısı cihazda takılırsa araçlar hiç yüklenmesin diye.
+    this.haritayiBaslat();
+    this.araclariGetir();
+    // Gerçek konumu arka planda al; gelirse haritayı yeniden ortala.
+    this.konumGuncelle();
   }
 
   ngOnDestroy() {
@@ -154,19 +159,29 @@ export class MapPage implements AfterViewInit, OnDestroy {
     this.sureSayaciniDurdur();
   }
 
-  async konumAl() {
+  // Konumu arka planda alır; tüm akış 8 sn'lik bir yarışa sarılır ki
+  // native izin/konum çağrısı takılsa bile uygulama kilitlenmesin.
+  private async konumGuncelle() {
     try {
-      await Geolocation.requestPermissions();
       const pos = await Promise.race([
-        Geolocation.getCurrentPosition({ enableHighAccuracy: false, timeout: 6000 }),
-        new Promise<never>((_, reject) => setTimeout(() => reject(new Error('timeout')), 7000))
+        (async () => {
+          await Geolocation.requestPermissions();
+          return Geolocation.getCurrentPosition({ enableHighAccuracy: false, timeout: 6000 });
+        })(),
+        new Promise<never>((_, reject) => setTimeout(() => reject(new Error('timeout')), 8000))
       ]);
       this.kullaniciKonumu = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+      // Haritayı ve kullanıcı marker'ını gerçek konuma taşı
+      if (this.map) {
+        this.userMarker?.setLatLng([this.kullaniciKonumu.lat, this.kullaniciKonumu.lng]);
+        this.map.setView([this.kullaniciKonumu.lat, this.kullaniciKonumu.lng], 14);
+      }
+      // Araçları gerçek konum etrafında yeniden konumlandır
+      this.araclar = [];
+      this.araclariGetir();
     } catch {
-      // izin verilmedi veya timeout — varsayılan konumla devam
+      // konum alınamadı/izin yok — araçlar zaten varsayılan konumla yüklendi
     }
-    this.haritayiBaslat();
-    this.araclariGetir();
   }
 
   haritayiBaslat() {
@@ -220,6 +235,8 @@ export class MapPage implements AfterViewInit, OnDestroy {
   async araclariGetir() {
     this.yukleniyor = true;
 
+    // Varsa eski toast'ı kapat (çift çağrıda üst üste binmesin)
+    await this.yuklemToast?.dismiss().catch(() => {});
     this.yuklemToast = await this.toastCtrl.create({
       message: 'Araçlar yükleniyor...',
       position: 'top',
@@ -231,7 +248,7 @@ export class MapPage implements AfterViewInit, OnDestroy {
     forkJoin({
       kiralamalar: this.http.get<any[]>(`${environment.API_BASE}/kiralamalar`),
       araclar: this.http.get<any[]>(`${environment.API_BASE}/araclar`)
-    }).pipe(timeout(20000)).subscribe({
+    }).pipe(timeout(45000)).subscribe({
       next: async (sonuclar) => {
         await this.yuklemToast?.dismiss();
         const kiralamalar = sonuclar.kiralamalar;
