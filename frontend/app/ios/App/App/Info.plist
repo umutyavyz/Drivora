@@ -47,5 +47,9 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Drivora, yakınındaki araçları haritada gösterebilmek için konumuna ihtiyaç duyuyor.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Drivora, yakınındaki araçları haritada gösterebilmek için konumuna ihtiyaç duyuyor.</string>
 </dict>
 </plist>

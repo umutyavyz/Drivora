@@ -9,6 +9,7 @@ import 'leaflet.markercluster';
 import { forkJoin } from 'rxjs';
 import { addIcons } from 'ionicons';
 import { cogOutline, checkmarkCircleOutline, closeCircleOutline } from 'ionicons/icons';
+import { Geolocation } from '@capacitor/geolocation';
 import { PaymentModalComponent, OdemeBilgisi } from '../payment-modal/payment-modal.component';
 import { RentalChecklistComponent, ChecklistAdimi } from '../rental-checklist/rental-checklist.component';
 import { AgreementModalComponent } from '../agreement-modal/agreement-modal.component';
@@ -153,26 +154,19 @@ export class MapPage implements AfterViewInit, OnDestroy {
     this.sureSayaciniDurdur();
   }
 
-  konumAl() {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          this.kullaniciKonumu = {
-            lat: pos.coords.latitude,
-            lng: pos.coords.longitude
-          };
-          this.haritayiBaslat();
-          this.araclariGetir();
-        },
-        () => {
-          this.haritayiBaslat();
-          this.araclariGetir();
-        }
-      );
-    } else {
-      this.haritayiBaslat();
-      this.araclariGetir();
+  async konumAl() {
+    try {
+      await Geolocation.requestPermissions();
+      const pos = await Promise.race([
+        Geolocation.getCurrentPosition({ enableHighAccuracy: false, timeout: 6000 }),
+        new Promise<never>((_, reject) => setTimeout(() => reject(new Error('timeout')), 7000))
+      ]);
+      this.kullaniciKonumu = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+    } catch {
+      // izin verilmedi veya timeout — varsayılan konumla devam
     }
+    this.haritayiBaslat();
+    this.araclariGetir();
   }
 
   haritayiBaslat() {
@@ -221,14 +215,25 @@ export class MapPage implements AfterViewInit, OnDestroy {
     return { lat: merkezLat + dLat, lng: merkezLng + dLng };
   }
 
-  araclariGetir() {
+  private yuklemToast: any = null;
+
+  async araclariGetir() {
     this.yukleniyor = true;
+
+    this.yuklemToast = await this.toastCtrl.create({
+      message: 'Araçlar yükleniyor...',
+      position: 'top',
+      color: 'dark',
+      cssClass: 'yukleme-toast',
+    });
+    await this.yuklemToast.present();
 
     forkJoin({
       kiralamalar: this.http.get<any[]>(`${environment.API_BASE}/kiralamalar`),
       araclar: this.http.get<any[]>(`${environment.API_BASE}/araclar`)
     }).subscribe({
-      next: (sonuclar) => {
+      next: async (sonuclar) => {
+        await this.yuklemToast?.dismiss();
         const kiralamalar = sonuclar.kiralamalar;
         const data = sonuclar.araclar;
 
@@ -300,9 +305,10 @@ export class MapPage implements AfterViewInit, OnDestroy {
         }
       },
       error: async () => {
+        await this.yuklemToast?.dismiss();
         this.yukleniyor = false;
         const toast = await this.toastCtrl.create({
-          message: 'Veriler yüklenemedi. Backend çalışıyor mu?',
+          message: 'Veriler yüklenemedi. Bağlantını kontrol et.',
           duration: 3000,
           color: 'danger',
           position: 'top'
