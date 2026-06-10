@@ -6,7 +6,7 @@ import { HttpClient } from '@angular/common/http';
 import { IonContent, IonIcon, IonSpinner, ToastController, AlertController } from '@ionic/angular/standalone';
 import * as L from 'leaflet';
 import 'leaflet.markercluster';
-import { forkJoin } from 'rxjs';
+import { forkJoin, timeout } from 'rxjs';
 import { addIcons } from 'ionicons';
 import { cogOutline, checkmarkCircleOutline, closeCircleOutline } from 'ionicons/icons';
 import { Geolocation } from '@capacitor/geolocation';
@@ -231,7 +231,7 @@ export class MapPage implements AfterViewInit, OnDestroy {
     forkJoin({
       kiralamalar: this.http.get<any[]>(`${environment.API_BASE}/kiralamalar`),
       araclar: this.http.get<any[]>(`${environment.API_BASE}/araclar`)
-    }).subscribe({
+    }).pipe(timeout(20000)).subscribe({
       next: async (sonuclar) => {
         await this.yuklemToast?.dismiss();
         const kiralamalar = sonuclar.kiralamalar;

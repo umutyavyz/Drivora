@@ -38,7 +38,7 @@ const jwtTokenOlustur = (kullanici: any) => {
       email_dogrulandi: !!kullanici.email_dogrulandi,
     },
     SECRET_KEY,
-    { expiresIn: "1h" }
+    { expiresIn: "30d" }
   );
 };
 
