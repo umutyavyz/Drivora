@@ -1,0 +1,28 @@
+<div class="onay-overlay" *ngIf="acik" (click)="vazgec.emit()">
+  <div class="onay-modal" (click)="$event.stopPropagation()">
+    <div class="onay-ust">
+      <p class="onay-arac-adi">{{ aracAdi }}</p>
+      <h3 class="onay-baslik">Kiralama Özeti</h3>
+    </div>
+
+    <div class="onay-satirlar">
+      <div class="onay-satir">
+        <span class="onay-etiket">Tür</span>
+        <span class="onay-deger">{{ tur === 'saatlik' ? 'Saatlik' : 'Günlük' }}</span>
+      </div>
+      <div class="onay-satir">
+        <span class="onay-etiket">Süre</span>
+        <span class="onay-deger">{{ sureMetni }}</span>
+      </div>
+      <div class="onay-satir onay-toplam-satir">
+        <span class="onay-etiket">Toplam</span>
+        <span class="onay-toplam-fiyat">₺{{ toplam | number:'1.0-0' }}</span>
+      </div>
+    </div>
+
+    <div class="onay-butonlar">
+      <button class="onay-btn-vazgec" (click)="vazgec.emit()">Vazgeç</button>
+      <button class="onay-btn-devam" (click)="onayla.emit()">Ödemeye Geç →</button>
+    </div>
+  </div>
+</div>

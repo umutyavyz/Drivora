@@ -1,0 +1,41 @@
+<div class="checklist-overlay" *ngIf="acik" (click)="overlayKapat()">
+  <div class="checklist-modal" (click)="$event.stopPropagation()">
+
+    <div class="checklist-progress">
+      <span class="progress-bar"
+            *ngFor="let _ of adimlar; let i = index"
+            [class.aktif]="adimIndex >= i"
+            [class.tamamlandi]="adimIndex > i"></span>
+    </div>
+
+    <div class="checklist-body">
+      <div class="checklist-yukleniyor" *ngIf="yukleniyor">
+        <ion-spinner name="crescent" class="baslatiyor-spinner"></ion-spinner>
+        <p class="baslatiyor-text">{{ yukleniyorMetin }}</p>
+      </div>
+
+      <ng-container *ngIf="!yukleniyor">
+        <div class="checklist-adim"
+             *ngFor="let adim of adimlar; let i = index"
+             [hidden]="adimIndex !== i">
+          <div class="adim-ikon" [class.ikon-mavi]="adim.renk === 'mavi'"
+                                 [class.ikon-turuncu]="adim.renk === 'turuncu'"
+                                 [class.ikon-yesil]="adim.renk === 'yesil'"
+                                 [class.ikon-mor]="adim.renk === 'mor'"
+                                 [class.ikon-kirmizi]="adim.renk === 'kirmizi'">
+            <ion-icon [name]="ionIkonAdi(adim.ikon)"></ion-icon>
+          </div>
+          <h2 class="adim-baslik">{{ adim.baslik }}</h2>
+          <p class="adim-aciklama">{{ adim.aciklama }}</p>
+        </div>
+      </ng-container>
+    </div>
+
+    <div class="checklist-footer" *ngIf="!yukleniyor">
+      <button class="btn-devam" (click)="ileri()">
+        {{ sonAdimda ? bitisMetni : devamMetni }} →
+      </button>
+    </div>
+
+  </div>
+</div>

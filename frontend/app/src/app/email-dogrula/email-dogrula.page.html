@@ -1,0 +1,42 @@
+<ion-content [fullscreen]="true">
+  <div class="wrap">
+    <div class="card">
+      <div class="brand">Drivora</div>
+
+      <div class="state" *ngIf="durum === 'isleniyor'">
+        <div class="ikon ikon-bekle">
+          <ion-spinner name="crescent"></ion-spinner>
+        </div>
+        <h2>Doğrulanıyor...</h2>
+        <p>Hesabın aktifleştiriliyor, lütfen bekle.</p>
+      </div>
+
+      <div class="state" *ngIf="durum === 'basarili'">
+        <div class="ikon ikon-basarili">
+          <ion-icon name="checkmark-circle"></ion-icon>
+        </div>
+        <h2>Hesabın doğrulandı! 🎉</h2>
+        <p>Artık araç kiralayabilir ve tüm Drivora özelliklerini kullanabilirsin.</p>
+        <button class="btn primary" (click)="uygulamayaGec()">Uygulamaya Geç →</button>
+      </div>
+
+      <div class="state" *ngIf="durum === 'zaten'">
+        <div class="ikon ikon-basarili">
+          <ion-icon name="checkmark-circle"></ion-icon>
+        </div>
+        <h2>Zaten doğrulanmış</h2>
+        <p>{{ mesaj || 'Bu hesap zaten doğrulanmış görünüyor.' }}</p>
+        <button class="btn primary" (click)="uygulamayaGec()">Uygulamaya Geç →</button>
+      </div>
+
+      <div class="state" *ngIf="durum === 'hata'">
+        <div class="ikon ikon-hata">
+          <ion-icon name="alert-circle"></ion-icon>
+        </div>
+        <h2>Doğrulanamadı</h2>
+        <p>{{ mesaj }}</p>
+        <button class="btn ikincil" (click)="girisYap()">Giriş Sayfasına Dön</button>
+      </div>
+    </div>
+  </div>
+</ion-content>

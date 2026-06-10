@@ -1,0 +1,54 @@
+<ion-content [fullscreen]="true">
+  <div class="page-container">
+
+    <div class="top-bar">
+      <button class="back-btn" (click)="geri()" aria-label="Geri dön">
+        <ion-icon name="chevron-back-outline"></ion-icon>
+      </button>
+      <div class="top-title">
+        <p class="greeting">Beğendiğin Araçlar</p>
+        <h1>Favorilerim</h1>
+      </div>
+    </div>
+
+    <div class="loading-state" *ngIf="yukleniyor">
+      <ion-spinner name="crescent"></ion-spinner>
+      <p>Favoriler yükleniyor...</p>
+    </div>
+
+    <ng-container *ngIf="!yukleniyor">
+
+      <!-- Boş durum -->
+      <div class="bos-durum" *ngIf="favoriler.length === 0">
+        <div class="bos-ikon"><ion-icon name="heart-outline"></ion-icon></div>
+        <p class="bos-baslik">Henüz favori araç yok</p>
+        <p class="bos-aciklama">Araç detay sayfasında kalbe dokunarak favorilerine ekleyebilirsin.</p>
+      </div>
+
+      <!-- Liste -->
+      <div class="favori-list" *ngIf="favoriler.length > 0">
+        <div class="favori-card" *ngFor="let a of favoriler" (click)="detaya(a)">
+          <div class="fc-resim">
+            <img *ngIf="a.resim_url" [src]="a.resim_url" [alt]="a.marka"/>
+            <ion-icon *ngIf="!a.resim_url" name="car-outline"></ion-icon>
+          </div>
+          <div class="fc-bilgi">
+            <p class="fc-marka">{{ a.marka }}</p>
+            <p class="fc-model">{{ a.model }}</p>
+            <div class="fc-alt">
+              <span class="fc-fiyat">₺{{ a.gunluk_fiyat }}<span class="fc-birim">/gün</span></span>
+              <span class="fc-puan" *ngIf="a.degerlendirme_sayisi > 0">
+                <ion-icon name="star"></ion-icon>{{ a.ortalama_puan }}
+              </span>
+            </div>
+          </div>
+          <button class="fc-kalp" (click)="favoridenCikar(a, $event)" aria-label="Favoriden çıkar">
+            <ion-icon name="heart"></ion-icon>
+          </button>
+        </div>
+      </div>
+
+    </ng-container>
+
+  </div>
+</ion-content>

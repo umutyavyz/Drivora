@@ -1,0 +1,73 @@
+<div class="agreement-modal-overlay" *ngIf="acik" (click)="reddet.emit()">
+  <div class="agreement-modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Kiralama Sözleşmesi</h2>
+      <p class="modal-subtitle">Devam etmeden önce lütfen okuyun</p>
+    </div>
+
+    <div class="modal-body">
+      <div class="sozlesme-section">
+        <div class="section-header">
+          <span class="section-number">1</span>
+          <h3>Kira Şartları</h3>
+        </div>
+        <ul class="section-list">
+          <li>Aracı belirtilen tarihler arasında kullanacağınızı kabul ediyorsunuz</li>
+          <li><strong>Günlük kira ücreti:</strong> ₺{{ gunlukFiyat }}</li>
+          <li>Ödeme işlemi kiralama başladığında gerçekleşir</li>
+        </ul>
+      </div>
+
+      <div class="sozlesme-section">
+        <div class="section-header">
+          <span class="section-number">2</span>
+          <h3>Araç Durumu ve Sorumluluk</h3>
+        </div>
+        <ul class="section-list">
+          <li>Aracı temiz ve hasarsız olarak teslim almışsınız</li>
+          <li>Kiralama süresi içinde oluşan tüm hasarlardan sorumlusunuz</li>
+          <li>Aracı geri verirken aynı durumda teslim etmeyi kabul ediyorsunuz</li>
+        </ul>
+      </div>
+
+      <div class="sozlesme-section">
+        <div class="section-header">
+          <span class="section-number">3</span>
+          <h3>Yakıt ve Kullanım</h3>
+        </div>
+        <ul class="section-list">
+          <li>Aracı tam deposu ile teslim alıyorsunuz</li>
+          <li>Kiralama bitiş tarihinde aynı şekilde tam deposu ile teslim etmeyi kabul ediyorsunuz</li>
+          <li>Yakıt eksikliği durumunda ek ücret uygulanır</li>
+        </ul>
+      </div>
+
+      <div class="sozlesme-section">
+        <div class="section-header">
+          <span class="section-number">4</span>
+          <h3>İptal ve Gecikme</h3>
+        </div>
+        <ul class="section-list">
+          <li>Belirtilen tarihte araç geri teslim edilmediği takdirde ek ücret alınır</li>
+          <li>Acil durumlarda müşteri hizmetleriyle iletişime geçmeniz gerekmektedir</li>
+        </ul>
+      </div>
+
+      <div class="agreement-notice">
+        <ion-icon name="checkmark-circle-outline" class="notice-icon"></ion-icon>
+        <p>Bu sözleşmeyi kabul ederek yukarıdaki tüm koşulları anladığınız ve kabul ettiğinizi beyan ediyorsunuz.</p>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-reject" (click)="reddet.emit()" aria-label="Sözleşmeyi reddet">
+        <ion-icon name="close-circle-outline"></ion-icon>
+        Kabul Etmiyorum
+      </button>
+      <button class="btn-accept" (click)="kabul.emit()" aria-label="Sözleşmeyi kabul et">
+        <ion-icon name="checkmark-circle-outline"></ion-icon>
+        Kabul Ediyorum
+      </button>
+    </div>
+  </div>
+</div>

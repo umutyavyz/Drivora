@@ -1,0 +1,64 @@
+<ion-content [fullscreen]="true">
+  <div class="wrap">
+    <div class="card">
+      <div class="brand">Drivora</div>
+
+      <ng-container *ngIf="durum === 'form'">
+        <div class="ikon ikon-kilit">
+          <ion-icon name="lock-closed-outline"></ion-icon>
+        </div>
+        <h2>Yeni Şifre Belirle</h2>
+        <p>Hesabın için yeni bir şifre belirle ve giriş yapmaya devam et.</p>
+
+        <div class="form-grup">
+          <label>YENİ ŞİFRE</label>
+          <div class="input-kutu">
+            <input
+              [type]="sifreGoster ? 'text' : 'password'"
+              [(ngModel)]="yeniSifre"
+              placeholder="En az 6 karakter"
+              autocomplete="new-password"
+            />
+            <button type="button" class="goz-btn" (click)="sifireleyiToggle()" [attr.aria-label]="sifreGoster ? 'Şifreyi gizle' : 'Şifreyi göster'">
+              <ion-icon [name]="sifreGoster ? 'eye-off-outline' : 'eye-outline'" aria-hidden="true"></ion-icon>
+            </button>
+          </div>
+        </div>
+
+        <div class="form-grup">
+          <label>ŞİFRE TEKRAR</label>
+          <div class="input-kutu">
+            <input
+              [type]="sifreGoster ? 'text' : 'password'"
+              [(ngModel)]="sifreTekrar"
+              placeholder="Şifreni tekrar gir"
+              autocomplete="new-password"
+            />
+          </div>
+        </div>
+
+        <button class="btn primary" (click)="kaydet()" [disabled]="yukleniyor">
+          {{ yukleniyor ? 'Güncelleniyor...' : 'Şifreyi Kaydet' }}
+        </button>
+      </ng-container>
+
+      <ng-container *ngIf="durum === 'basarili'">
+        <div class="ikon ikon-basarili">
+          <ion-icon name="checkmark-circle"></ion-icon>
+        </div>
+        <h2>Şifren güncellendi! ✨</h2>
+        <p>Yeni şifrenle giriş yapabilirsin.</p>
+        <button class="btn primary" (click)="girisYap()">Giriş Yap</button>
+      </ng-container>
+
+      <ng-container *ngIf="durum === 'hata'">
+        <div class="ikon ikon-hata">
+          <ion-icon name="alert-circle"></ion-icon>
+        </div>
+        <h2>Sıfırlama yapılamadı</h2>
+        <p>{{ hataMesaji }}</p>
+        <button class="btn primary" (click)="girisYap()">Giriş Sayfasına Dön</button>
+      </ng-container>
+    </div>
+  </div>
+</ion-content>

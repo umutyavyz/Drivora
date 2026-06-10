@@ -1,0 +1,197 @@
+ion-content {
+  --background: var(--app-bg);
+}
+
+.page-container {
+  padding: 20px 18px 80px;
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.top-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 22px;
+}
+
+.back-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--app-card-bg);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--app-text);
+  font-size: 22px;
+  cursor: pointer;
+  flex-shrink: 0;
+
+  &:active { transform: scale(0.94); }
+}
+
+.top-title {
+  .greeting {
+    margin: 0;
+    font-size: 12px;
+    color: var(--app-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+  }
+
+  h1 {
+    margin: 2px 0 0;
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--app-text);
+    letter-spacing: -0.5px;
+  }
+}
+
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 80px 20px;
+  color: var(--app-text-muted);
+
+  ion-spinner { --color: #4a9eff; }
+}
+
+// Boş durum
+.bos-durum {
+  text-align: center;
+  padding: 70px 24px;
+
+  .bos-ikon {
+    width: 72px;
+    height: 72px;
+    margin: 0 auto 16px;
+    border-radius: 50%;
+    background: var(--app-card-bg);
+    border: 1px solid var(--app-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    ion-icon { font-size: 34px; color: #ef4444; }
+  }
+
+  .bos-baslik {
+    margin: 0 0 6px;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--app-text);
+  }
+
+  .bos-aciklama {
+    margin: 0;
+    font-size: 13px;
+    color: var(--app-text-muted);
+    line-height: 1.5;
+  }
+}
+
+// Liste
+.favori-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.favori-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--app-card-bg);
+  border: 1px solid var(--app-border);
+  border-radius: 18px;
+  padding: 12px;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+
+  &:active { transform: scale(0.98); }
+
+  .fc-resim {
+    width: 84px;
+    height: 64px;
+    flex-shrink: 0;
+    border-radius: 12px;
+    overflow: hidden;
+    background: var(--app-icon-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    img { width: 100%; height: 100%; object-fit: cover; }
+    ion-icon { font-size: 30px; color: var(--app-border); }
+  }
+
+  .fc-bilgi {
+    flex: 1;
+    min-width: 0;
+
+    .fc-marka {
+      margin: 0;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--app-text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .fc-model {
+      margin: 2px 0 6px;
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--app-text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .fc-alt {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+
+      .fc-fiyat {
+        font-size: 14px;
+        font-weight: 800;
+        color: #4a9eff;
+
+        .fc-birim { font-size: 11px; font-weight: 500; color: var(--app-text-muted); }
+      }
+
+      .fc-puan {
+        display: flex;
+        align-items: center;
+        gap: 3px;
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--app-text-muted);
+
+        ion-icon { font-size: 13px; color: #f59e0b; }
+      }
+    }
+  }
+
+  .fc-kalp {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+
+    ion-icon { font-size: 20px; color: #ef4444; }
+    &:active { transform: scale(0.9); }
+  }
+}

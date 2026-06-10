@@ -1,0 +1,457 @@
+ion-content {
+  --background: var(--app-bg);
+}
+
+.page-container {
+  min-height: 100vh;
+  padding: var(--drivora-safe-top) 20px 32px;
+  color: var(--app-text);
+}
+
+.header {
+  margin-bottom: 20px;
+
+  .greeting {
+    font-size: 13px;
+    color: var(--app-text-muted);
+    margin: 0 0 4px 0;
+    letter-spacing: 0.5px;
+  }
+
+  h1 {
+    font-size: 28px;
+    font-weight: 800;
+    margin: 0;
+    color: var(--app-text);
+  }
+}
+
+// Stats Banner
+.stats-banner {
+  display: flex;
+  align-items: center;
+  background: var(--app-card-bg);
+  border: 1px solid var(--app-border);
+  border-radius: 18px;
+  padding: 16px 0;
+  margin-bottom: 16px;
+
+  .stat-kart {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+
+    .stat-sayi {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--app-text);
+      line-height: 1;
+    }
+
+    .stat-etiket {
+      font-size: 11px;
+      color: var(--app-text-muted);
+      letter-spacing: 0.3px;
+    }
+  }
+
+  .stat-ayrac {
+    width: 1px;
+    height: 32px;
+    background: var(--app-border);
+  }
+}
+
+// Filtre Sekmeleri
+.filtre-bar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+
+  .filtre-btn {
+    background: var(--app-card-bg);
+    border: 1px solid var(--app-border);
+    color: var(--app-text-muted);
+    padding: 8px 14px;
+    border-radius: 100px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+
+    .filtre-sayi {
+      background: var(--app-icon-bg);
+      color: var(--app-text-muted);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 100px;
+    }
+
+    &.aktif {
+      background: #4a9eff;
+      border-color: #4a9eff;
+      color: #ffffff;
+
+      .filtre-sayi {
+        background: rgba(255, 255, 255, 0.2);
+        color: #ffffff;
+      }
+    }
+  }
+}
+
+// Kiralama Listesi
+.kiralama-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.kiralama-card {
+  background: var(--app-card-bg);
+  border: 1px solid var(--app-border);
+  border-radius: 24px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+
+  &:active {
+    border-color: #4a9eff;
+  }
+
+  .card-image {
+    position: relative;
+    height: 150px;
+    overflow: hidden;
+    background: var(--app-icon-bg);
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .image-placeholder {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--app-border);
+      font-size: 52px;
+    }
+
+    .status-badge {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: var(--app-modal-overlay);
+      backdrop-filter: blur(10px);
+      padding: 5px 10px;
+      border-radius: 100px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      font-weight: 600;
+      color: #ffffff;
+
+      .dot {
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        background: #ffffff;
+      }
+
+      &.aktif {
+        color: #22c55e;
+
+        .dot {
+          background: #22c55e;
+          box-shadow: 0 0 6px #22c55e;
+        }
+      }
+    }
+
+    .tip-rozet {
+      position: absolute;
+      bottom: 12px;
+      left: 12px;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(8px);
+      color: #ffffff;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 100px;
+      letter-spacing: 0.3px;
+
+      &.saatlik {
+        background: rgba(245, 158, 11, 0.75);
+      }
+    }
+  }
+
+  .card-content {
+    padding: 16px;
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 14px;
+
+      .brand {
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--app-text-muted);
+        margin: 0 0 2px 0;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+      }
+
+      .model {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--app-text);
+        margin: 0;
+      }
+
+    }
+
+    .card-info {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding: 12px 0;
+      border-top: 1px solid var(--app-border);
+
+      .info-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+
+        &.duration-row.live {
+          .info-ikon-wrap {
+            color: #22c55e;
+          }
+
+          .info-value {
+            color: #22c55e;
+            font-weight: 700;
+
+            .live-dot {
+              display: inline-block;
+              width: 5px;
+              height: 5px;
+              border-radius: 50%;
+              background: #22c55e;
+              margin-left: 6px;
+              box-shadow: 0 0 5px #22c55e;
+              animation: pulse 1.4s ease-in-out infinite;
+            }
+          }
+        }
+
+        &.maliyet-row {
+          .info-ikon-wrap {
+            color: #22c55e;
+          }
+
+          .maliyet-tutar {
+            color: #22c55e;
+            font-weight: 700;
+          }
+
+          .kart-rozet {
+            font-family: 'Menlo', monospace;
+            font-size: 10px;
+            color: var(--app-text-muted);
+            letter-spacing: 0.4px;
+            margin-left: 4px;
+            text-transform: none;
+          }
+        }
+
+        .info-ikon-wrap {
+          width: 36px;
+          height: 36px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 20px;
+          color: var(--app-text-muted);
+          flex-shrink: 0;
+          background: transparent;
+
+          &.live-ikon {
+            color: #22c55e;
+          }
+
+          &.maliyet-ikon {
+            color: #22c55e;
+          }
+        }
+
+        .info-content {
+          flex: 1;
+
+          .info-label {
+            font-size: 10px;
+            color: var(--app-text-muted);
+            margin: 0 0 1px 0;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+          }
+
+          .info-value {
+            font-size: 13px;
+            color: var(--app-text);
+            margin: 0;
+            font-weight: 500;
+          }
+        }
+      }
+    }
+
+    .card-actions {
+      margin-top: 10px;
+
+      .end-btn {
+        width: 100%;
+        background: rgba(239, 68, 68, 0.08);
+        border: 1px solid rgba(239, 68, 68, 0.25);
+        color: #ef4444;
+        padding: 11px;
+        border-radius: 12px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.2s ease;
+
+        &:hover {
+          background: rgba(239, 68, 68, 0.13);
+        }
+      }
+    }
+  }
+}
+
+// Loading
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 20px;
+  gap: 16px;
+
+  ion-spinner {
+    --color: #4a9eff;
+    width: 36px;
+    height: 36px;
+  }
+
+  p {
+    font-size: 14px;
+    color: var(--app-text-muted);
+    margin: 0;
+  }
+}
+
+// Filtre boş
+.filtre-bos {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--app-text-muted);
+  font-size: 14px;
+}
+
+// Empty State
+.empty-state {
+  text-align: center;
+  padding: 60px 20px 40px;
+
+  .empty-ikon {
+    width: 72px;
+    height: 72px;
+    border-radius: 22px;
+    background: var(--app-icon-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    font-size: 36px;
+    color: var(--app-text-muted);
+  }
+
+  h3 {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--app-text);
+    margin: 0 0 8px 0;
+  }
+
+  p {
+    font-size: 14px;
+    color: var(--app-text-muted);
+    margin: 0 0 24px;
+    line-height: 1.5;
+  }
+
+  .gozat-btn {
+    background: linear-gradient(135deg, #4a9eff, #6c63ff);
+    color: #ffffff;
+    border: none;
+    padding: 14px 28px;
+    border-radius: 100px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.85); }
+}
+
+/* ---- Giriş animasyonları ---- */
+.stats-banner { animation: drvFadeUp 0.45s cubic-bezier(0.22, 1, 0.36, 1) backwards; }
+.filtre-bar   { animation: drvFadeUp 0.45s cubic-bezier(0.22, 1, 0.36, 1) 0.06s backwards; }
+
+.kiralama-card {
+  animation: drvFadeUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  @for $i from 1 through 10 {
+    &:nth-child(#{$i}) { animation-delay: #{0.06 * $i + 0.05}s; }
+  }
+}
+
+.empty-state .empty-ikon { animation: drvFloat 3s ease-in-out infinite; }
+
+/* ---- Responsive ---- */
+/* Tablet & masaüstü: içeriği ortala, kiralama kartlarını ızgaraya çevir */
+@media (min-width: 768px) {
+  .page-container {
+    max-width: 860px;
+    margin: 0 auto;
+  }
+
+  .kiralama-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    align-items: start;
+  }
+}
+
+@media (min-width: 1100px) {
+  .kiralama-list {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}

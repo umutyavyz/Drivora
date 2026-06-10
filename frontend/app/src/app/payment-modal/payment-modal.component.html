@@ -1,0 +1,230 @@
+<div class="odeme-overlay" *ngIf="acik" (click)="vazgec()">
+  <div class="odeme-modal" (click)="$event.stopPropagation()">
+
+    <!-- FORM EKRANI -->
+    <ng-container *ngIf="durum === 'form'">
+      <div class="modal-baslik">
+        <div class="baslik-icerik">
+          <h2>Ödeme</h2>
+          <p>{{ aracMetin }} · {{ ozetMetin }}</p>
+        </div>
+        <button class="kapat-btn" (click)="vazgec()" aria-label="Kapat">
+          <ion-icon name="close-outline"></ion-icon>
+        </button>
+      </div>
+
+      <!-- Kartlar yükleniyor -->
+      <div class="kartlar-yukleniyor" *ngIf="kartlarYukleniyor">
+        <ion-spinner name="crescent"></ion-spinner>
+      </div>
+
+      <!-- KAYITLI KARTLAR LİSTESİ -->
+      <ng-container *ngIf="!kartlarYukleniyor && gorunum === 'liste'">
+        <div class="kayitli-liste">
+          <p class="liste-baslik">Kayıtlı kartların</p>
+
+          <button
+            class="kayitli-kart"
+            *ngFor="let kart of kayitliKartlar"
+            [class.secili]="seciliKartId === kart.id"
+            (click)="kartSec(kart.id)">
+            <span class="secim-daire" [class.dolu]="seciliKartId === kart.id">
+              <ion-icon name="checkmark-outline" *ngIf="seciliKartId === kart.id"></ion-icon>
+            </span>
+            <div class="marka-rozet" [attr.data-marka]="kart.kart_marka">
+              <img *ngIf="kart.kart_marka === 'VISA'" src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Visa_Inc._logo_%282021%E2%80%93present%29.svg/3840px-Visa_Inc._logo_%282021%E2%80%93present%29.svg.png" alt="VISA" class="marka-logo"/>
+              <img *ngIf="kart.kart_marka === 'MASTERCARD'" src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Mastercard-logo.svg/3840px-Mastercard-logo.svg.png" alt="Mastercard" class="marka-logo marka-logo-mc"/>
+              <span *ngIf="kart.kart_marka !== 'VISA' && kart.kart_marka !== 'MASTERCARD'">{{ kart.kart_marka }}</span>
+            </div>
+            <div class="kart-bilgi">
+              <span class="kart-numara">•••• {{ kart.kart_son_4 }}</span>
+              <span class="kart-detay">{{ kart.kart_sahibi }} · {{ kart.son_kullanma }}</span>
+            </div>
+            <span class="varsayilan-etiket" *ngIf="kart.varsayilan">Varsayılan</span>
+            <button class="sil-btn" (click)="kayitliKartSil(kart, $event)" aria-label="Kartı sil">
+              <ion-icon name="trash-outline"></ion-icon>
+            </button>
+          </button>
+
+          <button class="yeni-kart-btn" (click)="yeniKartEkraniAc()">
+            <ion-icon name="add-outline"></ion-icon>
+            Yeni kart ekle
+          </button>
+        </div>
+      </ng-container>
+
+      <!-- YENİ KART FORMU -->
+      <ng-container *ngIf="!kartlarYukleniyor && gorunum === 'form'">
+        <button class="geri-link" *ngIf="kayitliKartlar.length > 0" (click)="listeyeDon()">
+          <ion-icon name="chevron-back-outline"></ion-icon>
+          Kayıtlı kartlara dön
+        </button>
+
+        <!-- Sahte kredi kartı önizleme -->
+        <div class="kart-onizleme" [class.flip]="false">
+          <div class="kart-marka-rozeti">
+            <img *ngIf="kartMarkasi === 'VISA'" src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Visa_Inc._logo_%282021%E2%80%93present%29.svg/3840px-Visa_Inc._logo_%282021%E2%80%93present%29.svg.png" alt="VISA" class="onizleme-logo"/>
+            <img *ngIf="kartMarkasi === 'MASTERCARD'" src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Mastercard-logo.svg/3840px-Mastercard-logo.svg.png" alt="Mastercard" class="onizleme-logo onizleme-logo-mc"/>
+            <span *ngIf="kartMarkasi !== 'VISA' && kartMarkasi !== 'MASTERCARD'">{{ kartMarkasi || 'KART' }}</span>
+          </div>
+          <div class="kart-chip"></div>
+          <div class="kart-no">
+            <span>{{ (kartNo + '                    ').slice(0, 4) || '••••' }}</span>
+            <span>{{ kartNo.length > 5 ? kartNo.slice(5, 9) : '••••' }}</span>
+            <span>{{ kartNo.length > 10 ? kartNo.slice(10, 14) : '••••' }}</span>
+            <span>{{ kartNo.length > 15 ? kartNo.slice(15, 19) : '••••' }}</span>
+          </div>
+          <div class="kart-alt">
+            <div>
+              <span class="kart-etiket">Kart Sahibi</span>
+              <span class="kart-deger">{{ kartSahibi || 'AD SOYAD' }}</span>
+            </div>
+            <div>
+              <span class="kart-etiket">Son K.</span>
+              <span class="kart-deger">{{ kartSonKullanma || 'AA/YY' }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Test kartı bilgi notu -->
+        <div class="test-karti-notu" (click)="testKartiDoldur()">
+          <ion-icon name="information-circle-outline"></ion-icon>
+          <div>
+            <strong>Test kartı kullan</strong>
+            <span>4242 4242 4242 4242 · CVV 123 · 12/28</span>
+          </div>
+        </div>
+
+        <!-- Form alanları -->
+        <div class="form-alani">
+          <div class="form-grup">
+            <label>Kart Numarası</label>
+            <div class="input-kutu" [class.hata]="kartHatalari.kartNo">
+              <ion-icon name="card-outline" class="input-ikon"></ion-icon>
+              <input
+                type="tel"
+                inputmode="numeric"
+                placeholder="0000 0000 0000 0000"
+                [(ngModel)]="kartNo"
+                (ngModelChange)="kartNoFormatla()"
+                maxlength="23"
+                autocomplete="cc-number"
+              />
+            </div>
+            <p class="hata-metin" *ngIf="kartHatalari.kartNo">{{ kartHatalari.kartNo }}</p>
+          </div>
+
+          <div class="form-grup">
+            <label>Kart Üzerindeki İsim</label>
+            <div class="input-kutu" [class.hata]="kartHatalari.kartSahibi">
+              <input
+                type="text"
+                placeholder="AD SOYAD"
+                [(ngModel)]="kartSahibi"
+                maxlength="50"
+                autocomplete="cc-name"
+              />
+            </div>
+            <p class="hata-metin" *ngIf="kartHatalari.kartSahibi">{{ kartHatalari.kartSahibi }}</p>
+          </div>
+
+          <div class="form-satir">
+            <div class="form-grup">
+              <label>Son Kullanma</label>
+              <div class="input-kutu" [class.hata]="kartHatalari.kartSonKullanma">
+                <input
+                  type="tel"
+                  inputmode="numeric"
+                  placeholder="AA/YY"
+                  [(ngModel)]="kartSonKullanma"
+                  (ngModelChange)="sonKullanmaFormatla()"
+                  maxlength="5"
+                  autocomplete="cc-exp"
+                />
+              </div>
+              <p class="hata-metin" *ngIf="kartHatalari.kartSonKullanma">{{ kartHatalari.kartSonKullanma }}</p>
+            </div>
+
+            <div class="form-grup">
+              <label>CVV</label>
+              <div class="input-kutu" [class.hata]="kartHatalari.kartCvv">
+                <ion-icon name="lock-closed-outline" class="input-ikon"></ion-icon>
+                <input
+                  type="tel"
+                  inputmode="numeric"
+                  placeholder="123"
+                  [(ngModel)]="kartCvv"
+                  (ngModelChange)="cvvFormatla()"
+                  maxlength="4"
+                  autocomplete="cc-csc"
+                />
+              </div>
+              <p class="hata-metin" *ngIf="kartHatalari.kartCvv">{{ kartHatalari.kartCvv }}</p>
+            </div>
+          </div>
+
+          <!-- Kartı kaydet seçeneği -->
+          <label class="kaydet-secenek">
+            <input type="checkbox" [(ngModel)]="kartKaydet" />
+            <span class="kaydet-kutu"><ion-icon name="checkmark-outline" *ngIf="kartKaydet"></ion-icon></span>
+            <span class="kaydet-metin">Bu kartı sonraki ödemeler için kaydet</span>
+          </label>
+        </div>
+      </ng-container>
+
+      <div class="ozet-cubuk" *ngIf="!kartlarYukleniyor">
+        <div>
+          <p class="ozet-etiket">Toplam</p>
+          <p class="ozet-tutar">₺{{ toplamTutar | number:'1.2-2' }}</p>
+        </div>
+        <button class="ode-btn" (click)="odeBasla()" [disabled]="gorunum === 'liste' && !seciliKartId">
+          <ion-icon name="lock-closed-outline"></ion-icon>
+          Ödemeyi Tamamla
+        </button>
+      </div>
+    </ng-container>
+
+    <!-- İŞLENİYOR -->
+    <ng-container *ngIf="durum === 'isleniyor'">
+      <div class="durum-ekran">
+        <div class="durum-ikon isleniyor">
+          <ion-spinner name="crescent"></ion-spinner>
+        </div>
+        <h2>Ödeme alınıyor...</h2>
+        <p>Lütfen bekleyin, kartınız doğrulanıyor.</p>
+        <div class="durum-detay">
+          <span>Kart **** {{ kartSon4Goster }}</span>
+          <span>₺{{ toplamTutar | number:'1.2-2' }}</span>
+        </div>
+      </div>
+    </ng-container>
+
+    <!-- BAŞARILI -->
+    <ng-container *ngIf="durum === 'basarili'">
+      <div class="durum-ekran">
+        <div class="durum-ikon basarili">
+          <ion-icon name="checkmark-circle"></ion-icon>
+        </div>
+        <h2>Ödeme başarılı</h2>
+        <p>₺{{ toplamTutar | number:'1.2-2' }} kartınızdan tahsil edildi.</p>
+        <div class="durum-detay">
+          <span>{{ aracMetin }}</span>
+          <span>Kart **** {{ kartSon4Goster }}</span>
+        </div>
+      </div>
+    </ng-container>
+
+    <!-- HATA -->
+    <ng-container *ngIf="durum === 'hata'">
+      <div class="durum-ekran">
+        <div class="durum-ikon hata">
+          <ion-icon name="alert-circle"></ion-icon>
+        </div>
+        <h2>Ödeme alınamadı</h2>
+        <p>{{ hataMesaji || 'Beklenmeyen bir hata oluştu.' }}</p>
+        <button class="ode-btn ikincil" (click)="vazgec()">Kapat</button>
+      </div>
+    </ng-container>
+
+  </div>
+</div>

@@ -1,0 +1,152 @@
+<ion-content [fullscreen]="true">
+  <div class="page-container">
+
+    <div class="header">
+      <p class="greeting">Kiralama Geçmişin</p>
+      <h1>Kiralamalarım</h1>
+    </div>
+
+    <div class="loading-state" *ngIf="yukleniyor">
+      <ion-spinner name="crescent"></ion-spinner>
+      <p>Kiralamalar yükleniyor...</p>
+    </div>
+
+    <ng-container *ngIf="!yukleniyor">
+
+      <!-- Stats Banner -->
+      <div class="stats-banner" *ngIf="kiralamalar.length > 0">
+        <div class="stat-kart">
+          <span class="stat-sayi">{{ kiralamalar.length }}</span>
+          <span class="stat-etiket">Toplam</span>
+        </div>
+        <div class="stat-ayrac"></div>
+        <div class="stat-kart">
+          <span class="stat-sayi">₺{{ toplamHarcama | number:'1.0-0' }}</span>
+          <span class="stat-etiket">Harcama</span>
+        </div>
+        <div class="stat-ayrac"></div>
+        <div class="stat-kart">
+          <span class="stat-sayi">{{ toplamSureMetni }}</span>
+          <span class="stat-etiket">Toplam Süre</span>
+        </div>
+      </div>
+
+      <!-- Filtre Sekmeleri -->
+      <div class="filtre-bar" *ngIf="kiralamalar.length > 0">
+        <button class="filtre-btn" [class.aktif]="aktifFiltre === 'hepsi'" (click)="filtreSec('hepsi')">
+          Hepsi <span class="filtre-sayi">{{ kiralamalar.length }}</span>
+        </button>
+        <button class="filtre-btn" [class.aktif]="aktifFiltre === 'aktif'" (click)="filtreSec('aktif')">
+          Aktif <span class="filtre-sayi">{{ aktifSayisi }}</span>
+        </button>
+        <button class="filtre-btn" [class.aktif]="aktifFiltre === 'tamamlandi'" (click)="filtreSec('tamamlandi')">
+          Tamamlanan
+        </button>
+      </div>
+
+      <!-- Kiralama Listesi -->
+      <div class="kiralama-list" *ngIf="filtrelenmisKiralamalar.length > 0">
+        <div class="kiralama-card" *ngFor="let kiralama of filtrelenmisKiralamalar" (click)="detayaGit(kiralama.arac_id)">
+          <div class="card-image">
+            <img *ngIf="kiralama.resim_url" [src]="kiralama.resim_url" [alt]="kiralama.marka"/>
+            <div class="image-placeholder" *ngIf="!kiralama.resim_url">
+              <ion-icon name="car-outline"></ion-icon>
+            </div>
+            <div class="status-badge" [class.aktif]="kiralama.durum === 'aktif'">
+              <span class="dot"></span>
+              {{ kiralama.durum === 'tamamlandi' ? 'Tamamlandı' : 'Aktif' }}
+            </div>
+            <span class="tip-rozet" [class.saatlik]="kiralama.kiralama_tipi === 'saatlik'">
+              {{ kiralama.kiralama_tipi === 'saatlik' ? 'Saatlik' : 'Günlük' }}
+            </span>
+          </div>
+
+          <div class="card-content">
+            <div class="card-header">
+              <div>
+                <p class="brand">{{ kiralama.marka }}</p>
+                <h3 class="model">{{ kiralama.model }}</h3>
+              </div>
+
+            </div>
+
+            <div class="card-info">
+              <div class="info-row">
+                <div class="info-ikon-wrap">
+                  <ion-icon name="calendar-outline"></ion-icon>
+                </div>
+                <div class="info-content">
+                  <p class="info-label">Başlangıç</p>
+                  <p class="info-value">{{ trTarih(kiralama.baslangic_tarihi) }}</p>
+                </div>
+              </div>
+              <div class="info-row" *ngIf="kiralama.bitis_tarihi">
+                <div class="info-ikon-wrap">
+                  <ion-icon name="flag-outline"></ion-icon>
+                </div>
+                <div class="info-content">
+                  <p class="info-label">Bitiş</p>
+                  <p class="info-value">{{ trTarih(kiralama.bitis_tarihi) }}</p>
+                </div>
+              </div>
+              <div class="info-row duration-row" [class.live]="kiralama.durum === 'aktif'">
+                <div class="info-ikon-wrap" [class.live-ikon]="kiralama.durum === 'aktif'">
+                  <ion-icon name="time-outline"></ion-icon>
+                </div>
+                <div class="info-content">
+                  <p class="info-label">{{ kiralama.durum === 'aktif' ? 'Geçen süre' : 'Toplam süre' }}</p>
+                  <p class="info-value">{{ sureMetni(kiralama.baslangic_tarihi, kiralama.bitis_tarihi) }}<span class="live-dot" *ngIf="kiralama.durum === 'aktif'"></span></p>
+                </div>
+              </div>
+              <div class="info-row maliyet-row" *ngIf="kiralama.toplam_tutar != null || kiralama.durum === 'tamamlandi'">
+                <div class="info-ikon-wrap maliyet-ikon">
+                  <ion-icon name="cash-outline"></ion-icon>
+                </div>
+                <div class="info-content">
+                  <p class="info-label">
+                    Ödenen
+                    <span class="kart-rozet" *ngIf="kiralama.kart_son_4">·  **** {{ kiralama.kart_son_4 }}</span>
+                  </p>
+                  <p class="info-value maliyet-tutar">₺{{ maliyetHesapla(kiralama) | number:'1.2-2' }}</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="card-actions" *ngIf="kiralama.durum === 'aktif'" (click)="$event.stopPropagation()">
+              <button class="end-btn" (click)="kiralamayiBitir(kiralama)">Kiralamayı Bitir</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filtre sonucu boş -->
+      <div class="filtre-bos" *ngIf="kiralamalar.length > 0 && filtrelenmisKiralamalar.length === 0">
+        <p>Bu filtrede kiralama yok.</p>
+      </div>
+
+      <!-- Hiç kiralama yok -->
+      <div class="empty-state" *ngIf="kiralamalar.length === 0">
+        <div class="empty-ikon">
+          <ion-icon name="receipt-outline"></ion-icon>
+        </div>
+        <h3>Henüz kiralaman yok</h3>
+        <p>Haritadan veya araçlar listesinden bir araç seçerek kiralama başlat.</p>
+        <button class="gozat-btn" (click)="araclaragozat()">Araçlara Gözat →</button>
+      </div>
+
+    </ng-container>
+
+  </div>
+
+  <!-- Kiralama Bitiş Checklist'i -->
+  <app-rental-checklist
+    [acik]="bitisChecklistAcik"
+    [adimlar]="bitisChecklistAdimlari"
+    [yukleniyor]="bitisChecklistYukleniyor"
+    [yukleniyorMetin]="'Kiralama sonlandırılıyor...'"
+    [devamMetni]="'Devam Et'"
+    [bitisMetni]="'Kiralamayı Bitir'"
+    (tamamlandi)="bitisChecklistTamam()"
+    (kapat)="bitisChecklistKapat()"
+  ></app-rental-checklist>
+</ion-content>

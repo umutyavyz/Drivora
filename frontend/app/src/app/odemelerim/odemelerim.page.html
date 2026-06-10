@@ -1,0 +1,82 @@
+<ion-content [fullscreen]="true">
+  <div class="page-container">
+
+    <div class="top-bar">
+      <button class="back-btn" (click)="geri()" aria-label="Geri dön">
+        <ion-icon name="chevron-back-outline"></ion-icon>
+      </button>
+      <div class="top-title">
+        <p class="greeting">Hesap Hareketleri</p>
+        <h1>Ödemelerim</h1>
+      </div>
+    </div>
+
+    <div class="loading-state" *ngIf="yukleniyor">
+      <ion-spinner name="crescent"></ion-spinner>
+      <p>Ödemeler yükleniyor...</p>
+    </div>
+
+    <ng-container *ngIf="!yukleniyor">
+
+      <div class="stats-banner" *ngIf="odemeler.length > 0">
+        <div class="stat-kart">
+          <span class="stat-sayi">{{ odemeler.length }}</span>
+          <span class="stat-etiket">İşlem</span>
+        </div>
+        <div class="stat-ayrac"></div>
+        <div class="stat-kart">
+          <span class="stat-sayi">₺{{ toplamTutar | number:'1.2-2' }}</span>
+          <span class="stat-etiket">Toplam Ödeme</span>
+        </div>
+      </div>
+
+      <div class="odeme-list" *ngIf="odemeler.length > 0">
+        <div class="odeme-card" *ngFor="let o of odemeler">
+          <div class="odeme-head">
+            <div class="head-sol">
+              <div class="kart-ikon">
+                <ion-icon name="card-outline"></ion-icon>
+              </div>
+              <div>
+                <p class="odeme-baslik">{{ o.marka }} {{ o.model }}</p>
+                <p class="odeme-aciklama">{{ o.aciklama }}</p>
+              </div>
+            </div>
+            <div class="head-sag">
+              <p class="odeme-tutar">₺{{ o.tutar | number:'1.2-2' }}</p>
+              <span class="durum-rozet" [class.basarili]="o.durum === 'basarili'">
+                <ion-icon name="checkmark-circle" *ngIf="o.durum === 'basarili'"></ion-icon>
+                {{ durumMetin(o.durum) }}
+              </span>
+            </div>
+          </div>
+
+          <div class="odeme-detay">
+            <div class="detay-satir">
+              <ion-icon name="calendar-outline"></ion-icon>
+              <span>{{ trTarih(o.olusturma_tarihi) }}</span>
+            </div>
+            <div class="detay-satir" *ngIf="o.kart_son_4">
+              <ion-icon name="card-outline"></ion-icon>
+              <span>**** **** **** {{ o.kart_son_4 }}<span class="kart-sahip" *ngIf="o.kart_sahibi"> · {{ o.kart_sahibi }}</span></span>
+            </div>
+            <div class="detay-satir islem-no" (click)="islemNoKopyala(o.islem_no)">
+              <ion-icon name="copy-outline"></ion-icon>
+              <span>{{ o.islem_no }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="empty-state" *ngIf="odemeler.length === 0">
+        <div class="empty-ikon">
+          <ion-icon name="receipt-outline"></ion-icon>
+        </div>
+        <h3>Henüz ödeme yok</h3>
+        <p>İlk aracını kiraladığında ödeme kayıtların burada görünecek.</p>
+      </div>
+
+    </ng-container>
+
+  </div>
+</ion-content>

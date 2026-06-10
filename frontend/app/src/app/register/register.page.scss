@@ -126,3 +126,37 @@ ion-content {
     cursor: pointer;
   }
 }
+
+/* ---- Giriş animasyonları ---- */
+.hero-section { animation: drvFadeUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) backwards; }
+
+.input-group  { animation: drvFadeUp 0.45s cubic-bezier(0.22, 1, 0.36, 1) 0.08s backwards; }
+.input-group + .input-group { animation-delay: 0.14s; }
+.input-group + .input-group + .input-group { animation-delay: 0.20s; }
+.input-group + .input-group + .input-group + .input-group { animation-delay: 0.26s; }
+
+.register-btn { animation: drvFadeUp 0.45s cubic-bezier(0.22, 1, 0.36, 1) 0.32s backwards; }
+.login-text   { animation: drvFade 0.6s ease 0.4s backwards; }
+
+/* ---- Responsive ---- */
+/* Tablet & masaüstü: kayıt kolonunu ortala */
+@media (min-width: 768px) {
+  .register-wrapper {
+    max-width: 480px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  .hero-section { height: 280px; }
+}
+
+/* Küçük telefonlar (≤360px) */
+@media (max-width: 360px) {
+  .hero-section {
+    height: 200px;
+
+    .hero-overlay h1 { font-size: 24px; }
+  }
+
+  .form-section { padding: 24px 20px; }
+}

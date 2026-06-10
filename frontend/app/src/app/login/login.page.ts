@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { environment } from '../../environments/environment';
 import { IonContent, IonIcon, ToastController } from '@ionic/angular/standalone';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
@@ -50,7 +51,7 @@ export class LoginPage {
       this.toastGoster('Şifre zorunludur', 'warning');
       return;
     }
-    this.http.post<any>('http://localhost:3000/kullanicilar/giris', {
+    this.http.post<any>(`${environment.API_BASE}/kullanicilar/giris`, {
       email: this.email.trim(),
       sifre: this.sifre
     }).subscribe({
@@ -72,6 +73,10 @@ export class LoginPage {
     });
   }
   kayitOl() {
-  this.router.navigate(['/register']);
-}
+    this.router.navigate(['/register']);
+  }
+
+  sifremiUnuttum() {
+    this.router.navigate(['/sifremi-unuttum']);
+  }
 }

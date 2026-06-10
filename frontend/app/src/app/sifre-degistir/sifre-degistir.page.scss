@@ -1,0 +1,160 @@
+ion-content {
+  --background: var(--app-bg);
+}
+
+.page-container {
+  min-height: 100vh;
+  padding: var(--drivora-safe-top) 20px 40px;
+  color: var(--app-text);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 40px;
+
+  .back-btn {
+    width: 44px;
+    height: 44px;
+    background: var(--app-card-bg);
+    border: 1px solid var(--app-border);
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: transform 0.15s ease;
+
+    ion-icon {
+      font-size: 20px;
+      color: var(--app-text);
+    }
+
+    &:active {
+      transform: scale(0.95);
+    }
+  }
+
+  .header-text {
+    .greeting {
+      font-size: 13px;
+      color: var(--app-text-muted);
+      margin: 0 0 2px 0;
+      letter-spacing: 0.5px;
+    }
+
+    h1 {
+      font-size: 26px;
+      font-weight: 800;
+      margin: 0;
+      color: var(--app-text);
+    }
+  }
+}
+
+.sifre-form {
+  background: var(--app-card-bg);
+  border: 1px solid var(--app-border);
+  border-radius: 20px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+.sifre-input-group {
+  label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--app-text-muted);
+    letter-spacing: 0.8px;
+    margin-bottom: 10px;
+  }
+}
+
+.sifre-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid var(--app-border);
+  padding-bottom: 10px;
+
+  .sifre-icon {
+    font-size: 18px;
+    color: var(--app-text-muted);
+    flex-shrink: 0;
+  }
+
+  input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--app-text);
+    font-size: 15px;
+
+    &::placeholder {
+      color: var(--app-text-muted);
+    }
+  }
+
+  .toggle-btn {
+    background: transparent;
+    border: none;
+    padding: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+
+    ion-icon {
+      font-size: 18px;
+      color: var(--app-text-muted);
+    }
+  }
+}
+
+.sifre-kaydet-btn {
+  width: 100%;
+  background: linear-gradient(135deg, #4a9eff, #6c63ff);
+  color: #ffffff;
+  border: none;
+  border-radius: 16px;
+  padding: 16px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+
+  &:active {
+    transform: scale(0.98);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+/* ---- Giriş animasyonları ---- */
+.header { animation: drvFadeUp 0.45s cubic-bezier(0.22, 1, 0.36, 1) backwards; }
+
+.sifre-input-group {
+  animation: drvFadeUp 0.45s cubic-bezier(0.22, 1, 0.36, 1) 0.08s backwards;
+}
+.sifre-input-group + .sifre-input-group { animation-delay: 0.16s; }
+.sifre-input-group + .sifre-input-group + .sifre-input-group { animation-delay: 0.24s; }
+
+.sifre-kaydet-btn { animation: drvFadeUp 0.45s cubic-bezier(0.22, 1, 0.36, 1) 0.32s backwards; }
+
+/* ---- Responsive ---- */
+/* Tablet & masaüstü: form kolonunu ortala */
+@media (min-width: 768px) {
+  .page-container {
+    max-width: 560px;
+    margin: 0 auto;
+  }
+}

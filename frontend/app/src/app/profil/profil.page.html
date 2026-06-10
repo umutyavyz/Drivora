@@ -1,0 +1,195 @@
+<ion-content [fullscreen]="true">
+  <div class="page-container">
+
+    <div class="header">
+      <p class="greeting">Hesabın</p>
+      <h1>Profil</h1>
+    </div>
+
+    <div class="profile-card">
+      <div class="avatar-wrapper">
+        <div class="avatar">
+          <ion-icon name="person" class="avatar-icon"></ion-icon>
+        </div>
+        <div class="badge" *ngIf="rol === 'admin'">
+          <ion-icon name="shield-checkmark"></ion-icon>
+        </div>
+      </div>
+      <h2>{{ adSoyad || email }}</h2>
+      <p class="user-email" *ngIf="adSoyad">{{ email }}</p>
+      <div class="rozetler">
+        <span class="role-tag">{{ rol === 'admin' ? 'Yönetici' : 'Üye' }}</span>
+        <span class="dogrulama-rozet" [class.dogrulu]="emailDogrulandi">
+          <ion-icon [name]="emailDogrulandi ? 'checkmark-circle' : 'alert-circle-outline'"></ion-icon>
+          {{ emailDogrulandi ? 'Doğrulandı' : 'Doğrulanmadı' }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Email doğrulama uyarı kartı -->
+    <div class="dogrulama-uyari" *ngIf="!emailDogrulandi">
+      <div class="dogrulama-ikon">
+        <ion-icon name="alert-circle-outline"></ion-icon>
+      </div>
+      <div class="dogrulama-icerik">
+        <p class="dogrulama-baslik">Email adresini doğrula</p>
+        <p class="dogrulama-aciklama">
+          Araç kiralamaya başlamak için <strong>{{ email }}</strong> adresine gönderilen linke tıklaman gerekiyor.
+        </p>
+        <button class="dogrulama-btn" (click)="dogrulamaMailiGonder()" [disabled]="dogrulamaGonderiliyor">
+          <ion-icon name="refresh-outline"></ion-icon>
+          {{ dogrulamaGonderiliyor ? 'Gönderiliyor...' : 'Doğrulama Mailini Tekrar Gönder' }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Bilgiler (görüntüleme modu) -->
+    <div class="info-list" *ngIf="!duzenleModu">
+      <div class="info-item" *ngIf="adSoyad">
+        <div class="info-icon">
+          <ion-icon name="person-outline"></ion-icon>
+        </div>
+        <div class="info-content">
+          <p class="info-label">Ad Soyad</p>
+          <p class="info-value">{{ adSoyad }}</p>
+        </div>
+      </div>
+
+      <div class="info-item">
+        <div class="info-icon">
+          <ion-icon name="mail-outline"></ion-icon>
+        </div>
+        <div class="info-content">
+          <p class="info-label">E-posta</p>
+          <p class="info-value">{{ email }}</p>
+        </div>
+      </div>
+
+      <div class="info-item" *ngIf="telefon">
+        <div class="info-icon">
+          <ion-icon name="call-outline"></ion-icon>
+        </div>
+        <div class="info-content">
+          <p class="info-label">Telefon</p>
+          <p class="info-value">{{ telefon }}</p>
+        </div>
+      </div>
+
+      <div class="info-item" *ngIf="dogumTarihi">
+        <div class="info-icon">
+          <ion-icon name="calendar-outline"></ion-icon>
+        </div>
+        <div class="info-content">
+          <p class="info-label">Doğum Tarihi</p>
+          <p class="info-value">{{ dogumTarihiFormatla(dogumTarihi) }}</p>
+        </div>
+      </div>
+
+      <div class="info-item">
+        <div class="info-icon">
+          <ion-icon name="shield-outline"></ion-icon>
+        </div>
+        <div class="info-content">
+          <p class="info-label">Hesap Tipi</p>
+          <p class="info-value">{{ rol === 'admin' ? 'Yönetici' : 'Standart Üye' }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Düzenleme formu -->
+    <div class="edit-form" *ngIf="duzenleModu">
+      <div class="edit-field">
+        <label>AD SOYAD</label>
+        <input type="text" [(ngModel)]="editAdSoyad" placeholder="Ad Soyad"/>
+      </div>
+      <div class="edit-field">
+        <label>TELEFON</label>
+        <input type="tel" [(ngModel)]="editTelefon" placeholder="05XX XXX XX XX"/>
+      </div>
+      <div class="edit-field">
+        <label>DOĞUM TARİHİ</label>
+        <input type="date" [(ngModel)]="editDogumTarihi" [max]="bugun" class="date-input"/>
+      </div>
+      <div class="edit-actions">
+        <button class="btn-vazgec" (click)="duzenlemeyiKapat()">
+          <ion-icon name="close-outline"></ion-icon>
+          Vazgeç
+        </button>
+        <button class="btn-kaydet" (click)="profilKaydet()" [disabled]="kayitYukleniyor">
+          <ion-icon name="checkmark-outline"></ion-icon>
+          {{ kayitYukleniyor ? 'Kaydediliyor...' : 'Kaydet' }}
+        </button>
+      </div>
+    </div>
+
+    <div class="actions-list">
+      <button class="action-item" (click)="duzenlemeyiAc()" *ngIf="!duzenleModu">
+        <div class="action-icon">
+          <ion-icon name="create-outline"></ion-icon>
+        </div>
+        <div class="action-content">
+          <p class="action-label">Profili Düzenle</p>
+          <p class="action-desc">Ad, telefon ve doğum tarihi</p>
+        </div>
+        <ion-icon name="chevron-forward-outline" class="action-chevron"></ion-icon>
+      </button>
+
+      <button class="action-item" (click)="sifreSayfasinaGit()">
+        <div class="action-icon">
+          <ion-icon name="lock-closed-outline"></ion-icon>
+        </div>
+        <div class="action-content">
+          <p class="action-label">Şifreyi Değiştir</p>
+          <p class="action-desc">Hesap güvenliğini güncelle</p>
+        </div>
+        <ion-icon name="chevron-forward-outline" class="action-chevron"></ion-icon>
+      </button>
+
+      <button class="action-item" (click)="favorilerSayfasinaGit()">
+        <div class="action-icon">
+          <ion-icon name="heart-outline"></ion-icon>
+        </div>
+        <div class="action-content">
+          <p class="action-label">Favorilerim</p>
+          <p class="action-desc">Beğendiğin araçlar</p>
+        </div>
+        <ion-icon name="chevron-forward-outline" class="action-chevron"></ion-icon>
+      </button>
+
+      <button class="action-item" (click)="odemelerSayfasinaGit()">
+        <div class="action-icon">
+          <ion-icon name="card-outline"></ion-icon>
+        </div>
+        <div class="action-content">
+          <p class="action-label">Ödemelerim</p>
+          <p class="action-desc">Geçmiş işlemler ve makbuzlar</p>
+        </div>
+        <ion-icon name="chevron-forward-outline" class="action-chevron"></ion-icon>
+      </button>
+    </div>
+
+    <div class="theme-selector">
+      <p class="section-title">Tema Tercihi</p>
+      <ion-segment [(ngModel)]="seciliTema" (ionChange)="temaDegistir($event)" mode="ios">
+        <ion-segment-button value="light">
+          <ion-icon name="sunny-outline"></ion-icon>
+          Açık
+        </ion-segment-button>
+        <ion-segment-button value="dark">
+          <ion-icon name="moon-outline"></ion-icon>
+          Koyu
+        </ion-segment-button>
+        <ion-segment-button value="system">
+          <ion-icon name="desktop-outline"></ion-icon>
+          Sistem
+        </ion-segment-button>
+      </ion-segment>
+    </div>
+
+    <button class="logout-btn" (click)="cikisYap()">
+      <ion-icon name="log-out-outline"></ion-icon>
+      Çıkış Yap
+    </button>
+
+  </div>
+</ion-content>

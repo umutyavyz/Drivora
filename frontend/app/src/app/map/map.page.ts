@@ -1,19 +1,25 @@
 import { Component, AfterViewInit, OnDestroy } from '@angular/core';
+import { environment } from '../../environments/environment';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { IonContent, IonIcon, IonSpinner, ToastController, AlertController } from '@ionic/angular/standalone';
 import * as L from 'leaflet';
+import 'leaflet.markercluster';
 import { forkJoin } from 'rxjs';
 import { addIcons } from 'ionicons';
-import { cogOutline } from 'ionicons/icons';
+import { cogOutline, checkmarkCircleOutline, closeCircleOutline } from 'ionicons/icons';
+import { PaymentModalComponent, OdemeBilgisi } from '../payment-modal/payment-modal.component';
+import { RentalChecklistComponent, ChecklistAdimi } from '../rental-checklist/rental-checklist.component';
+import { AgreementModalComponent } from '../agreement-modal/agreement-modal.component';
+import { RentalSummaryModalComponent } from '../rental-summary-modal/rental-summary-modal.component';
 
 @Component({
   selector: 'app-map',
   templateUrl: './map.page.html',
   styleUrls: ['./map.page.scss'],
   standalone: true,
-  imports: [CommonModule, IonContent, IonIcon, IonSpinner],
+  imports: [CommonModule, IonContent, IonIcon, IonSpinner, PaymentModalComponent, RentalChecklistComponent, AgreementModalComponent, RentalSummaryModalComponent],
 })
 export class MapPage implements AfterViewInit, OnDestroy {
   map: any;
@@ -22,17 +28,35 @@ export class MapPage implements AfterViewInit, OnDestroy {
   seciliArac: any = null;
   kullaniciKonumu: { lat: number; lng: number } = { lat: 41.0082, lng: 28.9784 };
   sadeceMusait = true;
+  kasaTipleri: string[] = [];
+  seciliKasaTipi: string | null = null;
+  seciliFiyatSinifi: string | null = null;
+  private readonly KASA_SIRASI = ['Hatchback', 'Sedan', 'SUV', 'Spor'];
+  private readonly FİYAT_SIRASI = ['Ekonomik', 'Orta Sınıf', 'Lüks', 'Spor', 'Elektrikli', 'Manuel', 'Otomatik'];
   enYakinArac: any = null;
   markerlar: any[] = [];
+  private clusterGroup: any = null;
   aktifKiralamaAracId: number | null = null;
   aktifKiralamaId: number | null = null;
+  aktifKiralamaBaslangici: string | null = null;
+  aktifKiralamaTipi: 'saatlik' | 'gunluk' | null = null;
+  aktifKiralamaSure: number | null = null;
+  kalanSure = '';
+  sureDoldu = false;
+  private otomatikBitisTetiklendi = false;
   yukleniyor = true;
   userMarker: any = null;
   rotaCizgisi: any = null;
   yuruyusDakika: number | null = null;
 
+  // Bottom-sheet aşağı sürükleyerek kapatma
+  sheetKaydirma = 0;            // anlık translateY (px)
+  sheetSurukleniyor = false;    // parmak basılıyken transition kapalı
+  private sheetBaslangicY = 0;
+
   private tileKatmani: any = null;
   private temaGozlemcisi: MutationObserver | null = null;
+  private sureSayaci: any = null;
 
   // Simülasyon değişkenleri
   private simInterval: any = null;
@@ -45,18 +69,75 @@ export class MapPage implements AfterViewInit, OnDestroy {
   private simIzCizgisi: any = null;
   private simIzNoktalar: [number, number][] = [];
 
+  // Sözleşme modalı
+  agreementModalOpen = false;
+  agreementModalRentalId: number | null = null;
+  agreementModalArac: any = null;
+
+  // Kiralama tipi & onay
+  kiralamaSecimi: 'saatlik' | 'gunluk' = 'gunluk';
+  onayModalAcik = false;
+
+  // Ödeme modal durumu
+  odemeAcik = false;
+  odemeDurum: 'form' | 'isleniyor' | 'basarili' | 'hata' = 'form';
+  odemeHataMesaji = '';
+  private odemeSonrasiKiralamaId: number | null = null;
+  private odemeSonrasiIlkKiralama = false;
+  private odemeSonrasiArac: any = null;
+
+  // Başlangıç checklist'i
+  baslangicChecklistAcik = false;
+  baslangicChecklistAdimlari: ChecklistAdimi[] = [
+    { ikon: 'konum',  renk: 'mavi',    baslik: 'Araca Yakın Olun',     aciklama: 'Sürüşe başlamadan önce aracın yanında olduğunuzdan emin olun.' },
+    { ikon: 'arama',  renk: 'turuncu', baslik: 'Aracı Kontrol Edin',   aciklama: 'Aracı dışarıdan inceleyin. Hasar veya eksiklik varsa mutlaka bildirin.' },
+    { ikon: 'roket',  renk: 'yesil',   baslik: 'İyi Yolculuklar!',     aciklama: 'Her şey hazır. Güvenli sürüşler dileriz.' },
+  ];
+
+  // Bitiş checklist'i
+  bitisChecklistAcik = false;
+  bitisChecklistYukleniyor = false;
+  bitisChecklistAdimlari: ChecklistAdimi[] = [
+    { ikon: 'kilit', renk: 'turuncu', baslik: 'Aracı Güvenli Park Edin',   aciklama: 'Kapıları kilitlediğinizden, farların ve müziğin kapalı olduğundan emin olun.' },
+    { ikon: 'canta', renk: 'mavi',    baslik: 'Eşyalarınızı Unutmayın',     aciklama: 'Çantanızı, telefonunuzu ve değerli eşyalarınızı araçta bırakmayın.' },
+    { ikon: 'el',    renk: 'yesil',   baslik: 'Tekrar Görüşmek Üzere',      aciklama: 'Bizi tercih ettiğiniz için teşekkürler. Yine bekleriz!' },
+  ];
+
   constructor(
     private http: HttpClient,
     private toastCtrl: ToastController,
-    private alertCtrl: AlertController,
-    private router: Router
+    private router: Router,
+    private alertCtrl: AlertController
   ) {
-    addIcons({ cogOutline });
+    addIcons({ cogOutline, checkmarkCircleOutline, closeCircleOutline });
+  }
+
+  // Kiralama bittikten sonra kullanıcıya aracı değerlendirmek isteyip istemediğini sorar
+  private async degerlendirmeSorusu(aracId: number | null, aracAdi: string) {
+    if (!aracId) return;
+    const alert = await this.alertCtrl.create({
+      header: 'Nasıldı?',
+      message: `${aracAdi} aracını değerlendirmek ister misin?`,
+      buttons: [
+        { text: 'Şimdi değil', role: 'cancel' },
+        {
+          text: 'Değerlendir',
+          handler: () => this.router.navigate(['/detail', aracId], { queryParams: { degerlendir: 1 } }),
+        },
+      ],
+    });
+    await alert.present();
   }
 
   detayaGit() {
     if (!this.seciliArac) return;
     this.router.navigate(['/detail', this.seciliArac.id]);
+  }
+
+  yolTarifiAc() {
+    if (!this.seciliArac) return;
+    const { latitude, longitude } = this.seciliArac;
+    window.open(`https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}`, '_system');
   }
 
   ngAfterViewInit() {
@@ -69,6 +150,7 @@ export class MapPage implements AfterViewInit, OnDestroy {
       this.temaGozlemcisi = null;
     }
     this.simulasyonDurdur();
+    this.sureSayaciniDurdur();
   }
 
   konumAl() {
@@ -140,14 +222,11 @@ export class MapPage implements AfterViewInit, OnDestroy {
   }
 
   araclariGetir() {
-    const token = localStorage.getItem('token');
-    const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
-
     this.yukleniyor = true;
 
     forkJoin({
-      kiralamalar: this.http.get<any[]>('http://localhost:3000/kiralamalar', { headers }),
-      araclar: this.http.get<any[]>('http://localhost:3000/araclar', { headers })
+      kiralamalar: this.http.get<any[]>(`${environment.API_BASE}/kiralamalar`),
+      araclar: this.http.get<any[]>(`${environment.API_BASE}/araclar`)
     }).subscribe({
       next: (sonuclar) => {
         const kiralamalar = sonuclar.kiralamalar;
@@ -156,6 +235,15 @@ export class MapPage implements AfterViewInit, OnDestroy {
         const aktif = kiralamalar.find(k => k.durum === 'aktif');
         this.aktifKiralamaAracId = aktif ? aktif.arac_id : null;
         this.aktifKiralamaId = aktif ? aktif.id : null;
+        this.aktifKiralamaBaslangici = aktif ? aktif.baslangic_tarihi : null;
+        this.aktifKiralamaTipi = aktif ? aktif.kiralama_tipi : null;
+        this.aktifKiralamaSure = aktif ? Number(aktif.sure) : null;
+
+        if (this.aktifKiralamaBaslangici && !this.sureSayaci) {
+          this.sureSayaciniBaslat();
+        } else if (!this.aktifKiralamaBaslangici) {
+          this.sureSayaciniDurdur();
+        }
 
         // Aktif kiralama yoksa simülasyonu durdur
         if (!this.aktifKiralamaAracId) {
@@ -196,6 +284,13 @@ export class MapPage implements AfterViewInit, OnDestroy {
         // En yakın müsait aracı bul
         this.enYakinArac = this.araclar.find(a => a.musait);
 
+        // Kasa tipi listesini güncelle
+        const kasaSet = new Set<string>(this.araclar.map(a => a.kasa_tipi).filter(Boolean));
+        this.kasaTipleri = [
+          ...this.KASA_SIRASI.filter(k => kasaSet.has(k)),
+          ...Array.from(kasaSet).filter(k => !this.KASA_SIRASI.includes(k))
+        ];
+
         this.filtreUygula();
         this.yukleniyor = false;
 
@@ -217,10 +312,40 @@ export class MapPage implements AfterViewInit, OnDestroy {
     });
   }
 
+  kasaTipiSec(tip: string) {
+    if (this.seciliKasaTipi === tip) {
+      this.seciliKasaTipi = null;
+      this.seciliFiyatSinifi = null;
+    } else {
+      this.seciliKasaTipi = tip;
+      this.seciliFiyatSinifi = null;
+    }
+    this.filtreUygula();
+  }
+
+  get mevcutFiyatSiniflari(): string[] {
+    if (!this.seciliKasaTipi) return [];
+    const araçlar = this.araclar.filter(a => a.kasa_tipi === this.seciliKasaTipi);
+    const sinifSet = new Set<string>(araçlar.map(a => a.kategori).filter(Boolean));
+    return this.FİYAT_SIRASI.filter(k => sinifSet.has(k));
+  }
+
+  fiyatSinifinSec(sinif: string) {
+    this.seciliFiyatSinifi = this.seciliFiyatSinifi === sinif ? null : sinif;
+    this.filtreUygula();
+  }
+
   filtreUygula() {
-    this.yakindakiAraclar = this.aktifKiralamaAracId
+    let liste = this.aktifKiralamaAracId
       ? this.araclar.filter(a => a.id === this.aktifKiralamaAracId)
       : (this.sadeceMusait ? this.araclar.filter(a => a.musait) : this.araclar);
+
+    if (!this.aktifKiralamaAracId) {
+      if (this.seciliKasaTipi) liste = liste.filter(a => a.kasa_tipi === this.seciliKasaTipi);
+      if (this.seciliFiyatSinifi) liste = liste.filter(a => a.kategori === this.seciliFiyatSinifi);
+    }
+
+    this.yakindakiAraclar = liste;
     this.araclariHaritayaEkle();
 
     if (this.userMarker) {
@@ -242,43 +367,67 @@ export class MapPage implements AfterViewInit, OnDestroy {
   }
 
   araclariHaritayaEkle() {
-    this.markerlar.forEach(m => this.map.removeLayer(m));
+    // Eski cluster group'u kaldır
+    if (this.clusterGroup && this.map) {
+      this.map.removeLayer(this.clusterGroup);
+    }
+    // Doğrudan haritaya eklenmiş marker'ları (ör. benim aracım) kaldır —
+    // yoksa kiralama bitince eski konumda öksüz mavi marker kalır.
+    if (this.map) {
+      this.markerlar.forEach(m => {
+        if (this.map.hasLayer(m)) this.map.removeLayer(m);
+      });
+    }
     this.markerlar = [];
 
+    const carSvgFn = (strokeColor: string) =>
+      `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M5 11L6.5 6.5C6.78 5.61 7.61 5 8.55 5H15.45C16.39 5 17.22 5.61 17.5 6.5L19 11M5 11H19M5 11V17C5 17.55 5.45 18 6 18H7C7.55 18 8 17.55 8 17V16H16V17C16 17.55 16.45 18 17 18H18C18.55 18 19 17.55 19 17V11M7.5 14C8.05 14 8.5 13.55 8.5 13C8.5 12.45 8.05 12 7.5 12C6.95 12 6.5 12.45 6.5 13C6.5 13.55 6.95 14 7.5 14ZM16.5 14C17.05 14 17.5 13.55 17.5 13C17.5 12.45 17.05 12 16.5 12C15.95 12 15.5 12.45 15.5 13C15.5 13.55 15.95 14 16.5 14Z" stroke="${strokeColor}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>`;
+
+    // Cluster group: benim aracım için devre dışı, diğerleri cluster'lanır
+    this.clusterGroup = (L as any).markerClusterGroup({
+      maxClusterRadius: 55,
+      iconCreateFunction: (cluster: any) => {
+        const count = cluster.getChildCount();
+        return L.divIcon({
+          html: `<div class="drv-cluster"><span>${count}</span></div>`,
+          className: '',
+          iconSize: [44, 44]
+        });
+      }
+    });
+
     this.yakindakiAraclar.forEach(arac => {
-      // Simülasyondaki aracı atla — onu ayrı yönetiyoruz
       if (this.simAktif && arac.id === this.aktifKiralamaAracId) return;
 
       const benimAracim = this.aktifKiralamaAracId === arac.id;
       const opacity = benimAracim ? 1 : (arac.musait ? 1 : 0.5);
-
       const strokeColor = benimAracim ? '#ffffff' : '#1a1a1a';
-      const bgColor = benimAracim
-        ? 'var(--app-primary)'
-        : '#ffffff';
+      const bgColor = benimAracim ? 'var(--app-primary)' : '#ffffff';
       const ringStyle = benimAracim
         ? 'box-shadow:0 0 0 4px rgba(74,158,255,0.35),0 4px 12px rgba(0,0,0,0.4);'
         : 'box-shadow:0 4px 12px rgba(0,0,0,0.4);';
 
-      const carSvg = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M5 11L6.5 6.5C6.78 5.61 7.61 5 8.55 5H15.45C16.39 5 17.22 5.61 17.5 6.5L19 11M5 11H19M5 11V17C5 17.55 5.45 18 6 18H7C7.55 18 8 17.55 8 17V16H16V17C16 17.55 16.45 18 17 18H18C18.55 18 19 17.55 19 17V11M7.5 14C8.05 14 8.5 13.55 8.5 13C8.5 12.45 8.05 12 7.5 12C6.95 12 6.5 12.45 6.5 13C6.5 13.55 6.95 14 7.5 14ZM16.5 14C17.05 14 17.5 13.55 17.5 13C17.5 12.45 17.05 12 16.5 12C15.95 12 15.5 12.45 15.5 13C15.5 13.55 15.95 14 16.5 14Z" stroke="${strokeColor}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>`;
-
       const aracIcon = L.divIcon({
-        html: `<div style="width:40px;height:40px;background:${bgColor};border-radius:50%;display:flex;align-items:center;justify-content:center;${ringStyle}opacity:${opacity};">${carSvg}</div>`,
+        html: `<div style="width:40px;height:40px;background:${bgColor};border-radius:50%;display:flex;align-items:center;justify-content:center;${ringStyle}opacity:${opacity};">${carSvgFn(strokeColor)}</div>`,
         iconSize: [40, 40],
         className: ''
       });
 
-      const marker = L.marker([arac.latitude, arac.longitude], { icon: aracIcon })
-        .addTo(this.map);
+      const marker = L.marker([arac.latitude, arac.longitude], { icon: aracIcon });
+      marker.on('click', () => this.aracSec(arac));
 
-      marker.on('click', () => {
-        this.aracSec(arac);
-      });
+      if (benimAracim) {
+        marker.addTo(this.map); // Benim aracım direkt haritaya (cluster dışı)
+      } else {
+        this.clusterGroup.addLayer(marker);
+      }
 
       this.markerlar.push(marker);
     });
+
+    this.map.addLayer(this.clusterGroup);
   }
 
   kullaniciKonumunaGit() {
@@ -325,34 +474,209 @@ export class MapPage implements AfterViewInit, OnDestroy {
   seciliyiKapat() {
     this.seciliArac = null;
     this.yuruyusDakika = null;
+    this.sheetKaydirma = 0;
+    this.sheetSurukleniyor = false;
     if (this.rotaCizgisi) {
       this.map.removeLayer(this.rotaCizgisi);
       this.rotaCizgisi = null;
     }
   }
 
-  async kirala() {
+  // ─── Bottom-sheet aşağı sürükleyerek kapatma ───────────────
+  sheetSurukleBaslat(ev: PointerEvent) {
+    this.sheetBaslangicY = ev.clientY;
+    this.sheetSurukleniyor = true;
+  }
+
+  sheetSurukleHareket(ev: PointerEvent) {
+    if (!this.sheetSurukleniyor) return;
+    // sadece aşağı yönde harekete izin ver
+    this.sheetKaydirma = Math.max(0, ev.clientY - this.sheetBaslangicY);
+  }
+
+  sheetSurukleBitir() {
+    if (!this.sheetSurukleniyor) return;
+    this.sheetSurukleniyor = false;
+    // ~110px'den fazla çekildiyse kapat, değilse geri otur
+    if (this.sheetKaydirma > 110) {
+      this.sheetKaydirma = window.innerHeight; // tamamen aşağı kaydır
+      setTimeout(() => this.seciliyiKapat(), 240);
+    } else {
+      this.sheetKaydirma = 0;
+    }
+  }
+
+  kirala() {
     if (!this.seciliArac) return;
+    this.onayModalAcik = true;
+  }
 
-    const token = localStorage.getItem('token');
-    const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
+  onayOnayla() {
+    this.onayModalAcik = false;
+    this.odemeDurum = 'form';
+    this.odemeHataMesaji = '';
+    this.odemeAcik = true;
+  }
 
-    this.http.post('http://localhost:3000/kiralamalar', { arac_id: this.seciliArac.id }, { headers })
+  onayVazgec() {
+    this.onayModalAcik = false;
+  }
+
+  get odemeAracMetni(): string {
+    if (!this.seciliArac) return '';
+    return `${this.seciliArac.marka} ${this.seciliArac.model}`;
+  }
+
+  get odemeOzetMetni(): string {
+    if (this.kiralamaSecimi === 'saatlik') return '1 saat';
+    if (this.kiralamaSecimi === 'gunluk') return '1 gün';
+    return '';
+  }
+
+  get odemeToplamTutar(): number {
+    if (!this.seciliArac) return 0;
+    if (this.kiralamaSecimi === 'saatlik') return Number(this.seciliArac.saatlik_fiyat) || 0;
+    if (this.kiralamaSecimi === 'gunluk') return Number(this.seciliArac.gunluk_fiyat) || 0;
+    return 0;
+  }
+
+  odemeKapat() {
+    if (this.odemeDurum === 'isleniyor') return;
+    this.odemeAcik = false;
+    this.odemeDurum = 'form';
+  }
+
+  odemeOnayla(odeme: OdemeBilgisi) {
+    if (!this.seciliArac || !this.kiralamaSecimi) return;
+    this.odemeDurum = 'isleniyor';
+    this.odemeHataMesaji = '';
+    const arac = this.seciliArac;
+
+    const govde = {
+      arac_id: arac.id,
+      kiralama_tipi: this.kiralamaSecimi,
+      sure: 1,
+      ...odeme,
+    };
+
+    setTimeout(() => {
+      this.http.post<any>(`${environment.API_BASE}/kiralamalar`, govde)
+        .subscribe({
+          next: (response) => {
+            this.odemeSonrasiArac = arac;
+            this.odemeSonrasiKiralamaId = response.kiralama?.id ?? null;
+            this.odemeSonrasiIlkKiralama = !!response.is_first_rental;
+            this.odemeDurum = 'basarili';
+          },
+          error: async (err) => {
+            if (err.error?.kod === 'EMAIL_DOGRULANMADI') {
+              this.odemeAcik = false;
+              this.odemeDurum = 'form';
+              const toast = await this.toastCtrl.create({
+                message: err.error.hata,
+                duration: 3500,
+                color: 'warning',
+                position: 'top',
+                buttons: [{
+                  text: 'Profil',
+                  handler: () => this.router.navigate(['/tabs/profil'])
+                }]
+              });
+              await toast.present();
+              return;
+            }
+            this.odemeDurum = 'hata';
+            this.odemeHataMesaji = err.error?.hata || 'Ödeme alınırken bir hata oluştu';
+          }
+        });
+    }, 1400);
+  }
+
+  odemeTamamlandi() {
+    this.odemeAcik = false;
+    this.odemeDurum = 'form';
+
+    if (this.odemeSonrasiIlkKiralama && this.odemeSonrasiKiralamaId) {
+      this.agreementModalArac = this.odemeSonrasiArac;
+      this.agreementModalRentalId = this.odemeSonrasiKiralamaId;
+      this.agreementModalOpen = true;
+    } else {
+      this.baslangicChecklistAcik = true;
+    }
+  }
+
+  baslangicChecklistKapat() {
+    this.baslangicChecklistAcik = false;
+  }
+
+  async baslangicChecklistTamam() {
+    this.baslangicChecklistAcik = false;
+    const arac = this.odemeSonrasiArac || this.seciliArac;
+    const aracMetin = arac ? `${arac.marka} ${arac.model}` : 'Araç';
+    const toast = await this.toastCtrl.create({
+      message: `${aracMetin} kiralandı! İyi yolculuklar.`,
+      duration: 2500,
+      color: 'success',
+      position: 'top'
+    });
+    await toast.present();
+    this.odemeSonrasiKiralamaId = null;
+    this.odemeSonrasiIlkKiralama = false;
+    this.odemeSonrasiArac = null;
+    this.seciliyiKapat();
+    this.araclariGetir();
+  }
+
+  acceptAgreement() {
+    if (!this.agreementModalRentalId) return;
+
+    const kiralama_id = this.agreementModalRentalId;
+    this.http.post(`${environment.API_BASE}/kiralamalar/confirm-agreement`,
+      { kiralama_id }
+    ).subscribe({
+      next: () => {
+        this.agreementModalOpen = false;
+        this.agreementModalRentalId = null;
+        this.agreementModalArac = null;
+        this.baslangicChecklistAcik = true;
+      },
+      error: async (err) => {
+        const toast = await this.toastCtrl.create({
+          message: err.error?.hata || 'Sözleşme onaylanırken hata oluştu',
+          duration: 2500,
+          color: 'danger',
+          position: 'top'
+        });
+        await toast.present();
+      }
+    });
+  }
+
+  rejectAgreement() {
+    if (!this.agreementModalRentalId) return;
+    const kiralama_id = this.agreementModalRentalId;
+    this.agreementModalOpen = false;
+    this.agreementModalRentalId = null;
+    this.agreementModalArac = null;
+    this.kiralamayiIptal(kiralama_id);
+  }
+
+  private kiralamayiIptal(kiralama_id: number) {
+    this.http.put(`${environment.API_BASE}/kiralamalar/${kiralama_id}/bitir`, {})
       .subscribe({
         next: async () => {
           const toast = await this.toastCtrl.create({
-            message: `${this.seciliArac.marka} ${this.seciliArac.model} kiralaması başlatıldı!`,
+            message: 'Kiralama iptal edildi.',
             duration: 2500,
-            color: 'success',
+            color: 'warning',
             position: 'top'
           });
           await toast.present();
-          this.seciliyiKapat();
           this.araclariGetir();
         },
-        error: async (err) => {
+        error: async () => {
           const toast = await this.toastCtrl.create({
-            message: err.error?.hata || 'Kiralama başarısız',
+            message: 'Hata oluştu.',
             duration: 2500,
             color: 'danger',
             position: 'top'
@@ -362,49 +686,83 @@ export class MapPage implements AfterViewInit, OnDestroy {
       });
   }
 
-  async kiralamayiBitir() {
-    if (!this.aktifKiralamaId || !this.seciliArac) return;
+  kiralamayiBitir() {
+    if (!this.aktifKiralamaId) return;
+    this.bitisChecklistYukleniyor = false;
+    this.bitisChecklistAcik = true;
+  }
 
-    const alert = await this.alertCtrl.create({
-      header: 'Kiralamayı Bitir',
-      message: `${this.seciliArac.marka} ${this.seciliArac.model} kiralamasını bitirmek istediğine emin misin?`,
-      buttons: [
-        { text: 'Vazgeç', role: 'cancel' },
-        {
-          text: 'Bitir',
-          role: 'destructive',
-          handler: () => {
-            const token = localStorage.getItem('token');
-            const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
+  // Süre dolunca kiralamayı checklist olmadan otomatik sonlandır
+  private otomatikBitir() {
+    if (this.otomatikBitisTetiklendi || !this.aktifKiralamaId) return;
+    this.otomatikBitisTetiklendi = true;
+    const id = this.aktifKiralamaId;
+    const aracId = this.aktifKiralamaAracId;
+    const bitenArac = this.araclar.find(a => a.id === aracId);
+    const aracAdi = bitenArac ? `${bitenArac.marka} ${bitenArac.model}` : 'Araç';
 
-            this.http.put(`http://localhost:3000/kiralamalar/${this.aktifKiralamaId}/bitir`, {}, { headers })
-              .subscribe({
-                next: async () => {
-                  const toast = await this.toastCtrl.create({
-                    message: 'Kiralama bitirildi',
-                    duration: 2000,
-                    color: 'success',
-                    position: 'top'
-                  });
-                  await toast.present();
-                  this.seciliyiKapat();
-                  this.araclariGetir();
-                },
-                error: async () => {
-                  const toast = await this.toastCtrl.create({
-                    message: 'Bir hata oluştu',
-                    duration: 2000,
-                    color: 'danger',
-                    position: 'top'
-                  });
-                  await toast.present();
-                }
-              });
-          }
+    this.http.put(`${environment.API_BASE}/kiralamalar/${id}/bitir`, {})
+      .subscribe({
+        next: async () => {
+          // Açık olabilecek bitiş checklist'i / bottom sheet kapansın
+          this.bitisChecklistAcik = false;
+          this.seciliyiKapat();
+          const toast = await this.toastCtrl.create({
+            message: 'Kiralama süresi doldu, otomatik olarak sonlandırıldı.',
+            duration: 3500, color: 'warning', position: 'top'
+          });
+          await toast.present();
+          this.araclariGetir();
+          await this.degerlendirmeSorusu(aracId, aracAdi);
+        },
+        error: async () => {
+          const toast = await this.toastCtrl.create({
+            message: 'Kiralama otomatik sonlandırılamadı, tekrar denenecek.',
+            duration: 3000, color: 'danger', position: 'top'
+          });
+          await toast.present();
+          // Her saniye yeniden denemesin diye 15 sn sonra tekrar dene
+          setTimeout(() => { this.otomatikBitisTetiklendi = false; }, 15000);
         }
-      ]
-    });
-    await alert.present();
+      });
+  }
+
+  bitisChecklistKapat() {
+    if (this.bitisChecklistYukleniyor) return;
+    this.bitisChecklistAcik = false;
+  }
+
+  bitisChecklistTamam() {
+    if (!this.aktifKiralamaId) return;
+    const id = this.aktifKiralamaId;
+    const aracId = this.aktifKiralamaAracId;
+    const bitenArac = this.araclar.find(a => a.id === aracId);
+    const aracAdi = bitenArac ? `${bitenArac.marka} ${bitenArac.model}` : 'Araç';
+
+    this.bitisChecklistYukleniyor = true;
+    this.http.put(`${environment.API_BASE}/kiralamalar/${id}/bitir`, {})
+      .subscribe({
+        next: async () => {
+          this.bitisChecklistYukleniyor = false;
+          this.bitisChecklistAcik = false;
+          const toast = await this.toastCtrl.create({
+            message: 'Kiralama bitirildi. Tekrar görüşmek üzere!',
+            duration: 2400, color: 'success', position: 'top'
+          });
+          await toast.present();
+          this.seciliyiKapat();
+          this.araclariGetir();
+          await this.degerlendirmeSorusu(aracId, aracAdi);
+        },
+        error: async (err) => {
+          this.bitisChecklistYukleniyor = false;
+          const toast = await this.toastCtrl.create({
+            message: err.error?.hata || 'Bir hata oluştu',
+            duration: 2400, color: 'danger', position: 'top'
+          });
+          await toast.present();
+        }
+      });
   }
 
   tileDegistir() {
@@ -445,6 +803,57 @@ export class MapPage implements AfterViewInit, OnDestroy {
     this.simInterval = setInterval(() => {
       this.simAdimAt();
     }, 2000);
+  }
+
+  private sureSayaciniBaslat() {
+    this.otomatikBitisTetiklendi = false;
+    this.kalanSureHesapla();
+    this.sureSayaci = setInterval(() => this.kalanSureHesapla(), 1000);
+  }
+
+  private sureSayaciniDurdur() {
+    if (this.sureSayaci) {
+      clearInterval(this.sureSayaci);
+      this.sureSayaci = null;
+    }
+    this.kalanSure = '';
+    this.sureDoldu = false;
+  }
+
+  // Kiralamanın bitiş zamanı (ms) = başlangıç + sure × birim
+  private kiralamaBitisZamani(): number | null {
+    if (!this.aktifKiralamaBaslangici || !this.aktifKiralamaSure) return null;
+    const baslangic = new Date(this.aktifKiralamaBaslangici).getTime();
+    const birimMs = this.aktifKiralamaTipi === 'saatlik' ? 3_600_000 : 86_400_000;
+    return baslangic + this.aktifKiralamaSure * birimMs;
+  }
+
+  // Belirlenen süreden itibaren geri sayım
+  private kalanSureHesapla() {
+    const bitis = this.kiralamaBitisZamani();
+    if (bitis === null) { this.kalanSure = ''; this.sureDoldu = false; return; }
+
+    let farkSn = Math.floor((bitis - Date.now()) / 1000);
+    if (farkSn <= 0) {
+      this.kalanSure = 'Süre doldu';
+      this.sureDoldu = true;
+      this.otomatikBitir();
+      return;
+    }
+    this.sureDoldu = false;
+
+    const gun = Math.floor(farkSn / 86400);
+    const saat = Math.floor((farkSn % 86400) / 3600);
+    const dakika = Math.floor((farkSn % 3600) / 60);
+    const saniye = farkSn % 60;
+
+    if (gun > 0) {
+      this.kalanSure = `${gun} g ${saat} sa ${String(dakika).padStart(2, '0')} dk`;
+    } else if (saat > 0) {
+      this.kalanSure = `${saat} sa ${String(dakika).padStart(2, '0')} dk`;
+    } else {
+      this.kalanSure = `${dakika} dk ${String(saniye).padStart(2, '0')} sn`;
+    }
   }
 
   simulasyonDurdur() {

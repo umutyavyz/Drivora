@@ -1,0 +1,389 @@
+ion-content {
+  --background: var(--app-bg);
+}
+
+ion-toolbar {
+  --background: var(--app-bg);
+  --border-color: transparent;
+  --min-height: 100px;
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 12px 20px;
+
+  .user-info {
+    .greeting {
+      font-size: 13px;
+      color: var(--app-text-muted);
+      margin: 0 0 4px 0;
+    }
+
+    h2 {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--app-text);
+      margin: 0 0 4px 0;
+    }
+
+    .location {
+      font-size: 13px;
+      color: var(--app-text-muted);
+      margin: 0;
+    }
+  }
+
+  .notification-icon {
+    width: 44px;
+    height: 44px;
+    background: var(--app-card-bg);
+    border: 1px solid var(--app-border);
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+  }
+}
+
+.search-bar {
+  display: flex;
+  align-items: center;
+  background: var(--app-card-bg);
+  border: 1px solid var(--app-border);
+  margin: var(--drivora-safe-top) 20px 16px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  gap: 12px;
+
+  .search-icon {
+    font-size: 16px;
+    opacity: 0.5;
+  }
+
+  input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    outline: none;
+    font-size: 14px;
+    color: var(--app-text);
+
+    &::placeholder {
+      color: var(--app-text-muted);
+    }
+  }
+
+  .filter-icon {
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, #4a9eff, #6c63ff);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 14px;
+  }
+}
+
+.categories {
+  display: flex;
+  gap: 8px;
+  padding: 0 20px 12px;
+  overflow-x: auto;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar { display: none; }
+
+  .category-btn {
+    flex-shrink: 0;
+    background: var(--app-card-bg);
+    border: 1.5px solid var(--app-border);
+    padding: 9px 18px;
+    border-radius: 100px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--app-text-muted);
+    cursor: pointer;
+    transition: all 0.18s ease;
+
+    &.active {
+      background: var(--app-text);
+      color: var(--app-bg);
+      border-color: var(--app-text);
+    }
+
+    &.secondary {
+      font-size: 13px;
+      padding: 7px 15px;
+      background: transparent;
+      border-color: rgba(74, 158, 255, 0.3);
+      color: var(--app-text-muted);
+
+      &.active {
+        background: rgba(74, 158, 255, 0.12);
+        border-color: #4a9eff;
+        color: #4a9eff;
+      }
+    }
+  }
+}
+
+.sub-categories {
+  padding-top: 0;
+  padding-bottom: 14px;
+  animation: drvFadeUp 0.25s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+
+.arac-list {
+  padding: 0 20px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 20px;
+  gap: 16px;
+
+  ion-spinner {
+    --color: #4a9eff;
+    width: 36px;
+    height: 36px;
+  }
+
+  p {
+    font-size: 14px;
+    color: var(--app-text-muted);
+    margin: 0;
+  }
+}
+
+.arac-card {
+  background: var(--app-card-bg);
+  border: 1px solid var(--app-border);
+  border-radius: 24px;
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+
+  &.aktif-kiralama {
+    border-color: rgba(74, 158, 255, 0.45);
+    background: linear-gradient(135deg, rgba(74, 158, 255, 0.08), rgba(108, 99, 255, 0.04));
+    box-shadow: 0 0 0 1px rgba(74, 158, 255, 0.15);
+  }
+
+  .rental-badge {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: linear-gradient(135deg, #4a9eff, #6c63ff);
+    color: white;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    padding: 5px 10px;
+    border-radius: 100px;
+    z-index: 3;
+  }
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 8px;
+    position: relative;
+    z-index: 2;
+
+    .brand-info {
+      .brand {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--app-text-muted);
+        margin: 0 0 2px 0;
+        letter-spacing: 1px;
+      }
+
+      .model {
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--app-text);
+        margin: 0;
+      }
+    }
+
+    .price-info {
+      text-align: right;
+
+      .amount {
+        font-size: 20px;
+        font-weight: 700;
+        color: #4a9eff;
+      }
+
+      .period {
+        font-size: 12px;
+        color: var(--app-text-muted);
+        display: block;
+      }
+    }
+  }
+
+  .card-image {
+    height: 140px;
+    margin: 8px -20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .image-placeholder {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--app-border);
+      font-size: 64px;
+    }
+  }
+
+  .card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding-top: 8px;
+
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      font-weight: 600;
+
+      .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+      }
+
+      &.musait {
+        color: #22c55e;
+        .dot { background: #22c55e; box-shadow: 0 0 8px #22c55e; }
+      }
+
+      &.dolu {
+        color: #ef4444;
+        .dot { background: #ef4444; }
+      }
+    }
+
+    .detail-btn {
+      border: none;
+      padding: 10px 16px;
+      border-radius: 100px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      background: var(--app-icon-bg);
+      color: var(--app-text);
+      border: 1px solid var(--app-border);
+
+      &:active {
+        transform: scale(0.95);
+      }
+    }
+  }
+}
+
+.empty-state {
+  text-align: center;
+  padding: 80px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  .empty-icon {
+    font-size: 64px;
+    color: var(--app-border);
+    margin-bottom: 16px;
+  }
+
+  h3 {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--app-text);
+    margin: 0 0 8px 0;
+  }
+
+  p {
+    font-size: 14px;
+    color: var(--app-text-muted);
+    margin: 0;
+    line-height: 1.5;
+    max-width: 280px;
+  }
+}
+
+/* ---- Giriş animasyonları ---- */
+.search-bar  { animation: drvFadeUp 0.45s cubic-bezier(0.22, 1, 0.36, 1) backwards; }
+.categories  { animation: drvFadeUp 0.45s cubic-bezier(0.22, 1, 0.36, 1) 0.06s backwards; }
+
+// overflow:hidden olan .arac-card'a backwards animasyon uygulamak
+// iOS WebKit'te compositing bug'ına yol açıyor — liste container'ını animate ediyoruz
+.arac-list { animation: drvFadeUp 0.45s cubic-bezier(0.22, 1, 0.36, 1) 0.1s backwards; }
+
+.empty-state {
+  animation: drvFade 0.5s ease backwards;
+  .empty-icon { animation: drvFloat 3s ease-in-out infinite; }
+}
+
+/* ---- Responsive ---- */
+/* Tablet: araç listesini ızgaraya çevir, içeriği ortala */
+@media (min-width: 768px) {
+  .search-bar {
+    max-width: 760px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .categories {
+    max-width: 760px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .arac-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    max-width: 800px;
+    margin: 0 auto;
+
+    .empty-state { grid-column: 1 / -1; }
+  }
+}
+
+/* Masaüstü / geniş tabletler: 3 sütun */
+@media (min-width: 1100px) {
+  .arac-list {
+    grid-template-columns: repeat(3, 1fr);
+    max-width: 1140px;
+  }
+
+  .search-bar,
+  .categories { max-width: 1140px; }
+}

@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { TabsPage } from './tabs.page';
+import { adminAuthGuard } from '../guards/admin-auth.guard';
 
 export const routes: Routes = [
   {
@@ -7,24 +8,25 @@ export const routes: Routes = [
     component: TabsPage,
     children: [
       {
-        path: 'tab1',
-        loadComponent: () => import('../tab1/tab1.page').then((m) => m.Tab1Page),
+        path: 'araclar',
+        loadComponent: () => import('../araclar/araclar.page').then((m) => m.AraclarPage),
       },
       {
         path: 'map',
         loadComponent: () => import('../map/map.page').then((m) => m.MapPage),
       },
       {
-        path: 'tab2',
-        loadComponent: () => import('../tab2/tab2.page').then((m) => m.Tab2Page),
+        path: 'kiralamalarim',
+        loadComponent: () => import('../kiralamalarim/kiralamalarim.page').then((m) => m.KiralamalarimPage),
       },
       {
-        path: 'tab3',
-        loadComponent: () => import('../tab3/tab3.page').then((m) => m.Tab3Page),
+        path: 'profil',
+        loadComponent: () => import('../profil/profil.page').then((m) => m.ProfilPage),
       },
       {
         path: 'admin',
         loadComponent: () => import('../admin/admin.page').then((m) => m.AdminPage),
+        canActivate: [adminAuthGuard],
       },
       {
         path: '',

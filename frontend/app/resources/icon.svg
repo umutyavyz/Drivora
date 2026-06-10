@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" fill="none">
+  <!-- Tam kanvas koyu zemin — köşe yuvarlamayı OS/üretici uygular -->
+  <rect width="1024" height="1024" fill="#15171c"/>
+  <!-- 64'lük monogram 16x büyütülür -->
+  <g transform="scale(16)">
+    <g stroke="#ffffff" stroke-width="4.5" stroke-linecap="round">
+      <line x1="9" y1="21" x2="19" y2="21"/>
+      <line x1="4" y1="32" x2="19" y2="32"/>
+      <line x1="9" y1="43" x2="19" y2="43"/>
+    </g>
+    <path fill-rule="evenodd" clip-rule="evenodd" fill="#ffffff"
+      d="M25 15 H38 C49 15 57 23 57 32 C57 41 49 49 38 49 H25 Z
+         M33 23.5 H38 C44.5 23.5 48 27.5 48 32 C48 36.5 44.5 40.5 38 40.5 H33 Z"/>
+  </g>
+</svg>

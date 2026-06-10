@@ -36,6 +36,16 @@
         <input type="password" [(ngModel)]="sifreTekrar" placeholder="••••••••"/>
       </div>
 
+      <div class="input-group">
+        <label>TELEFON <span class="opsiyonel">(opsiyonel)</span></label>
+        <input type="tel" [(ngModel)]="telefon" placeholder="05XX XXX XX XX"/>
+      </div>
+
+      <div class="input-group">
+        <label>DOĞUM TARİHİ <span class="opsiyonel">(opsiyonel)</span></label>
+        <input type="date" [(ngModel)]="dogumTarihi" [max]="maxDogumTarihi" class="date-input"/>
+      </div>
+
       <button class="register-btn" (click)="kayitOl()">
         Kayıt Ol →
       </button>

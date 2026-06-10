@@ -113,3 +113,37 @@ ion-content {
     }
   }
 }
+
+/* ---- Giriş animasyonları ---- */
+.hero-section { animation: drvFade 0.7s ease backwards; }
+
+.content-section {
+  .brand       { animation: drvFadeUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.15s backwards; }
+  h1           { animation: drvFadeUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.25s backwards; }
+  > p          { animation: drvFadeUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.35s backwards; }
+  .cta-btn     { animation: drvFadeUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.45s backwards; }
+  .footer-text { animation: drvFade 0.6s ease 0.6s backwards; }
+}
+
+/* ---- Responsive ---- */
+/* Tablet & masaüstü: içerik bloğunu ortala, geniş ekranda yayılmasın */
+@media (min-width: 768px) {
+  .hero-section { min-height: 58vh; }
+
+  .content-section {
+    max-width: 600px;
+    margin: 0 auto;
+    width: 100%;
+    padding-top: 48px;
+  }
+}
+
+/* Çok küçük telefonlar (≤360px): başlık/boşlukları kıs */
+@media (max-width: 360px) {
+  .content-section {
+    padding: 24px 20px 32px;
+
+    h1 { font-size: 30px; }
+    p  { font-size: 14px; }
+  }
+}

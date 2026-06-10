@@ -1,9 +1,11 @@
 import { Component, EnvironmentInjector, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router, NavigationEnd } from '@angular/router';
 import { IonTabs, IonTabBar, IonTabButton, IonIcon, IonLabel } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { carOutline, keyOutline, personOutline, mapOutline, settingsOutline } from 'ionicons/icons';
 import { jwtDecode } from 'jwt-decode';
+import { filter } from 'rxjs/operators';
 
 @Component({
   selector: 'app-tabs',
@@ -14,10 +16,18 @@ import { jwtDecode } from 'jwt-decode';
 export class TabsPage {
   public environmentInjector = inject(EnvironmentInjector);
   isAdmin = false;
+  isAdminRoute = false;
 
-  constructor() {
+  constructor(private router: Router) {
     addIcons({ carOutline, keyOutline, personOutline, mapOutline, settingsOutline });
     this.rolKontrol();
+    this.isAdminRoute = this.router.url?.includes('/admin') ?? false;
+
+    this.router.events.pipe(
+      filter(e => e instanceof NavigationEnd)
+    ).subscribe((e: any) => {
+      this.isAdminRoute = (e.urlAfterRedirects || e.url).includes('/admin');
+    });
   }
 
   ionViewWillEnter() {
@@ -35,7 +45,6 @@ export class TabsPage {
       }
       return;
     }
-
     this.isAdmin = false;
   }
 }

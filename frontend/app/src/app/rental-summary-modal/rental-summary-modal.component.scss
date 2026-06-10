@@ -1,0 +1,123 @@
+.onay-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: flex-end;
+  z-index: 2000;
+  animation: osFadeIn 0.2s ease;
+}
+
+@keyframes osFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes osSlideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+.onay-modal {
+  width: 100%;
+  background: var(--app-card-bg);
+  border-radius: 28px 28px 0 0;
+  padding: 28px 24px calc(24px + var(--drivora-safe-bottom, 0px));
+  animation: osSlideUp 0.35s cubic-bezier(0.34, 1.4, 0.64, 1);
+
+  .onay-ust {
+    margin-bottom: 20px;
+
+    .onay-arac-adi {
+      margin: 0 0 2px;
+      font-size: 13px;
+      color: var(--app-text-muted);
+    }
+
+    .onay-baslik {
+      margin: 0;
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--app-text);
+      letter-spacing: -0.3px;
+    }
+  }
+
+  .onay-satirlar {
+    border-top: 1px solid var(--app-border);
+    margin-bottom: 24px;
+  }
+
+  .onay-satir {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--app-border);
+
+    .onay-etiket {
+      font-size: 14px;
+      color: var(--app-text-muted);
+    }
+
+    .onay-deger {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--app-text);
+    }
+  }
+
+  .onay-toplam-satir {
+    border-bottom: none;
+
+    .onay-etiket { font-size: 15px; font-weight: 600; color: var(--app-text); }
+
+    .onay-toplam-fiyat {
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--app-text);
+      letter-spacing: -0.5px;
+    }
+  }
+
+  .onay-butonlar {
+    display: flex;
+    gap: 12px;
+
+    .onay-btn-vazgec {
+      flex: 1;
+      padding: 15px;
+      border-radius: 14px;
+      background: var(--app-icon-bg);
+      border: 1px solid var(--app-border);
+      color: var(--app-text-muted);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .onay-btn-devam {
+      flex: 2;
+      padding: 15px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #4a9eff, #2563eb);
+      border: none;
+      color: #fff;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 6px 20px rgba(74, 158, 255, 0.35);
+
+      &:active { transform: scale(0.98); }
+    }
+  }
+}
+
+/* Tablet & masaüstü: ortalanmış kart */
+@media (min-width: 768px) {
+  .onay-modal {
+    max-width: 460px;
+    margin: 0 auto 24px;
+    border-radius: 24px;
+  }
+}

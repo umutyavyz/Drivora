@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 
-const SECRET_KEY = "drivora-gizli-anahtar";
+const SECRET_KEY = process.env.JWT_SECRET || "drivora-gizli-anahtar";
 
 export const tokenKontrol = (req: Request, res: Response, next: NextFunction) => {
   const authHeader = req.headers["authorization"];

@@ -1,0 +1,63 @@
+<ion-content [fullscreen]="true">
+  <div class="page-container">
+
+    <div class="header">
+      <button class="back-btn" (click)="geriDon()" aria-label="Geri dön">
+        <ion-icon name="arrow-back-outline" aria-hidden="true"></ion-icon>
+      </button>
+      <div class="header-text">
+        <p class="greeting">Güvenlik</p>
+        <h1>Şifre Değiştir</h1>
+      </div>
+    </div>
+
+    <div class="sifre-form">
+      <div class="sifre-input-group">
+        <label>MEVCUT ŞIFRE</label>
+        <div class="sifre-input-wrap">
+          <ion-icon name="lock-closed-outline" class="sifre-icon"></ion-icon>
+          <input
+            [type]="mevcutSifreGoster ? 'text' : 'password'"
+            [(ngModel)]="mevcutSifre"
+            placeholder="Mevcut şifreniz"/>
+          <button class="toggle-btn" (click)="mevcutSifreGoster = !mevcutSifreGoster" [attr.aria-label]="mevcutSifreGoster ? 'Şifreyi gizle' : 'Şifreyi göster'">
+            <ion-icon [name]="mevcutSifreGoster ? 'eye-off-outline' : 'eye-outline'" aria-hidden="true"></ion-icon>
+          </button>
+        </div>
+      </div>
+
+      <div class="sifre-input-group">
+        <label>YENİ ŞIFRE</label>
+        <div class="sifre-input-wrap">
+          <ion-icon name="lock-closed-outline" class="sifre-icon"></ion-icon>
+          <input
+            [type]="yeniSifreGoster ? 'text' : 'password'"
+            [(ngModel)]="yeniSifre"
+            placeholder="En az 6 karakter"/>
+          <button class="toggle-btn" (click)="yeniSifreGoster = !yeniSifreGoster" [attr.aria-label]="yeniSifreGoster ? 'Şifreyi gizle' : 'Şifreyi göster'">
+            <ion-icon [name]="yeniSifreGoster ? 'eye-off-outline' : 'eye-outline'" aria-hidden="true"></ion-icon>
+          </button>
+        </div>
+      </div>
+
+      <div class="sifre-input-group">
+        <label>YENİ ŞIFRE TEKRAR</label>
+        <div class="sifre-input-wrap">
+          <ion-icon name="lock-closed-outline" class="sifre-icon"></ion-icon>
+          <input
+            [type]="yeniSifreTekrarGoster ? 'text' : 'password'"
+            [(ngModel)]="yeniSifreTekrar"
+            placeholder="Yeni şifreyi tekrar girin"/>
+          <button class="toggle-btn" (click)="yeniSifreTekrarGoster = !yeniSifreTekrarGoster" [attr.aria-label]="yeniSifreTekrarGoster ? 'Şifreyi gizle' : 'Şifreyi göster'">
+            <ion-icon [name]="yeniSifreTekrarGoster ? 'eye-off-outline' : 'eye-outline'" aria-hidden="true"></ion-icon>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <button class="sifre-kaydet-btn" (click)="sifreDegistir()" [disabled]="yukleniyor">
+      {{ yukleniyor ? 'Güncelleniyor...' : 'Şifreyi Güncelle' }}
+    </button>
+
+  </div>
+</ion-content>

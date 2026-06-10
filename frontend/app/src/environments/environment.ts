@@ -3,7 +3,10 @@
 // The list of file replacements can be found in `angular.json`.
 
 export const environment = {
-  production: false
+  production: false,
+  // Telefondan test için bilgisayarın yerel IP adresini kullan
+  // Sadece bilgisayardan test ediyorsan 'localhost' olarak değiştirebilirsin
+  API_BASE: `https://${window.location.hostname}:3000`
 };
 
 /*

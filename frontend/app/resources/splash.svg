@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2732" height="2732" viewBox="0 0 2732 2732" fill="none">
+  <rect width="2732" height="2732" fill="#15171c"/>
+  <!-- Ortada ~560px'lik monogram (64 grid, 1366,1366 merkez) -->
+  <g transform="translate(1086, 1086) scale(8.75)">
+    <g stroke="#ffffff" stroke-width="4.5" stroke-linecap="round">
+      <line x1="9" y1="21" x2="19" y2="21"/>
+      <line x1="4" y1="32" x2="19" y2="32"/>
+      <line x1="9" y1="43" x2="19" y2="43"/>
+    </g>
+    <path fill-rule="evenodd" clip-rule="evenodd" fill="#ffffff"
+      d="M25 15 H38 C49 15 57 23 57 32 C57 41 49 49 38 49 H25 Z
+         M33 23.5 H38 C44.5 23.5 48 27.5 48 32 C48 36.5 44.5 40.5 38 40.5 H33 Z"/>
+  </g>
+</svg>

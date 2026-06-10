@@ -1,0 +1,48 @@
+<ion-content [fullscreen]="true">
+  <div class="wrap">
+    <button class="back" (click)="geri()" aria-label="Geri dön">
+      <ion-icon name="chevron-back-outline" aria-hidden="true"></ion-icon>
+    </button>
+
+    <div class="card">
+      <div class="brand">Drivora</div>
+
+      <ng-container *ngIf="!gonderildi">
+        <div class="ikon ikon-mail">
+          <ion-icon name="mail-outline"></ion-icon>
+        </div>
+        <h2>Şifreni mi unuttun?</h2>
+        <p>Hesabına bağlı email adresini gir, sana sıfırlama bağlantısı gönderelim.</p>
+
+        <div class="form-grup">
+          <label>E-POSTA ADRESİ</label>
+          <input
+            type="email"
+            [(ngModel)]="email"
+            placeholder="kullanici@drivora.com"
+            autocomplete="email"
+          />
+        </div>
+
+        <button class="btn primary" (click)="gonder()" [disabled]="yukleniyor">
+          {{ yukleniyor ? 'Gönderiliyor...' : 'Sıfırlama Bağlantısı Gönder' }}
+        </button>
+
+        <button class="btn ikincil" (click)="geri()">Giriş Sayfasına Dön</button>
+      </ng-container>
+
+      <ng-container *ngIf="gonderildi">
+        <div class="ikon ikon-basarili">
+          <ion-icon name="checkmark-circle"></ion-icon>
+        </div>
+        <h2>Mail gönderildi! 📬</h2>
+        <p>
+          <strong>{{ email }}</strong> adresine bir sıfırlama bağlantısı gönderdik.
+          Gelen kutunu (ve spam klasörünü) kontrol et.
+        </p>
+        <p class="hint">Link 30 dakika geçerlidir.</p>
+        <button class="btn primary" (click)="geri()">Tamam</button>
+      </ng-container>
+    </div>
+  </div>
+</ion-content>

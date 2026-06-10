@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { environment } from '../../environments/environment';
 import { IonContent, ToastController } from '@ionic/angular/standalone';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
@@ -16,6 +17,9 @@ export class RegisterPage {
   email = '';
   sifre = '';
   sifreTekrar = '';
+  telefon = '';
+  dogumTarihi = '';
+  maxDogumTarihi = (() => { const d = new Date(); d.setFullYear(d.getFullYear() - 18); return d.toISOString().split('T')[0]; })();
 
   constructor(
     private http: HttpClient,
@@ -69,33 +73,25 @@ export class RegisterPage {
       return;
     }
 
-    this.http.post<any>('http://localhost:3000/kullanicilar/kayit', {
+    this.http.post<any>(`${environment.API_BASE}/kullanicilar/kayit`, {
       email: this.email.trim(),
       sifre: this.sifre,
-      ad_soyad: this.adSoyad.trim()
+      ad_soyad: this.adSoyad.trim(),
+      telefon: this.telefon.trim() || null,
+      dogum_tarihi: this.dogumTarihi || null
     }).subscribe({
-      next: () => {
-        this.otomatikGirisYap();
+      next: async (res) => {
+        if (res.token) {
+          localStorage.setItem('token', res.token);
+        }
+        const mesaj = res.dogrulama_maili_gonderildi
+          ? 'Hoş geldin! Email adresine doğrulama maili gönderildi.'
+          : 'Hoş geldin! Hesabını profil sayfasından doğrulayabilirsin.';
+        this.toastGoster(mesaj, 'success');
+        this.router.navigate(['/tabs/araclar'], { replaceUrl: true });
       },
       error: (err) => {
         this.toastGoster(err.error?.hata || 'Kayıt başarısız', 'danger');
-      }
-    });
-  }
-
-  private otomatikGirisYap() {
-    this.http.post<any>('http://localhost:3000/kullanicilar/giris', {
-      email: this.email,
-      sifre: this.sifre
-    }).subscribe({
-      next: (res) => {
-        localStorage.setItem('token', res.token);
-        this.toastGoster('Hoş geldin!', 'success');
-        this.router.navigate(['/tabs/map'], { replaceUrl: true });
-      },
-      error: () => {
-        this.toastGoster('Kayıt başarılı, lütfen giriş yap', 'warning');
-        this.router.navigate(['/login']);
       }
     });
   }

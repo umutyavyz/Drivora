@@ -1,26 +1,53 @@
 <ion-content [fullscreen]="true">
   <div class="detail-wrapper" *ngIf="!yukleniyor && arac">
-    <div class="top-bar">
-      <button class="back-btn" (click)="geri()">←</button>
-      <span class="top-title">Araç Detayı</span>
-      <span class="top-spacer"></span>
-    </div>
-
     <div class="hero">
-      <div class="hero-bg"></div>
-      <img class="hero-img" *ngIf="arac.resim_url" [src]="arac.resim_url" [alt]="arac.marka"/>
-      <div class="hero-placeholder" *ngIf="!arac.resim_url">
-        <ion-icon name="car-outline"></ion-icon>
+      <!-- Karusel -->
+      <div class="hero-karusel" (scroll)="onKaruselKaydirma($event)">
+        <div class="hero-slayt" *ngFor="let resim of resimler">
+          <div class="hero-bg"></div>
+          <img class="hero-img" [src]="resim" [alt]="arac.marka" />
+        </div>
+        <div class="hero-slayt" *ngIf="resimler.length === 0">
+          <div class="hero-placeholder">
+            <ion-icon name="car-outline"></ion-icon>
+          </div>
+        </div>
       </div>
+
+      <!-- Overlay kontrolleri -->
+      <button class="back-btn" (click)="geri()" aria-label="Geri dön">←</button>
+      <button class="favori-btn" (click)="toggleFavori()" [attr.aria-label]="favori ? 'Favorilerden çıkar' : 'Favorilere ekle'" [attr.aria-pressed]="favori">
+        <ion-icon [name]="favori ? 'heart' : 'heart-outline'" [class.aktif]="favori" aria-hidden="true"></ion-icon>
+      </button>
       <div class="hero-status" [class.musait]="arac.musait" [class.dolu]="!arac.musait">
         <span class="dot"></span>
         {{ arac.musait ? 'Müsait' : 'Dolu' }}
       </div>
+
+      <!-- Dot göstergesi -->
+      <div class="hero-noktalar" *ngIf="resimler.length > 1">
+        <span class="nokta" *ngFor="let r of resimler; let i = index" [class.aktif]="aktifResimIndex === i"></span>
+      </div>
     </div>
 
     <div class="info-section">
-      <p class="brand">{{ arac.marka }}</p>
-      <h1 class="model">{{ arac.model }}</h1>
+      <div class="model-satir">
+        <div>
+          <p class="brand">{{ arac.marka }}</p>
+          <h1 class="model">{{ arac.model }}</h1>
+          <div class="model-puan" *ngIf="degerlendirmeOzet.adet > 0">
+            <ion-icon name="star"></ion-icon>
+            <span class="mp-deger">{{ degerlendirmeOzet.ortalama }}</span>
+            <span class="mp-adet">({{ degerlendirmeOzet.adet }})</span>
+          </div>
+        </div>
+        <button
+          class="kirala-btn-inline"
+          [disabled]="!arac.musait || !!aktifKiralama"
+          (click)="kirala()">
+          {{ !arac.musait ? 'Müsait Değil' : (aktifKiralama ? 'Aktif Kira.' : 'Kirala →') }}
+        </button>
+      </div>
 
       <div class="features">
         <div class="feature-card" *ngIf="arac.yakit">
@@ -47,6 +74,161 @@
           <p class="warning-text">{{ aktifKiralama.marka }} {{ aktifKiralama.model }} — yeni kiralama için önce onu bitir.</p>
         </div>
       </div>
+
+      <!-- Süre & Fiyat Hesaplayıcı -->
+      <div class="sure-kisim">
+        <h3 class="kisim-baslik">Süre & Fiyat</h3>
+
+        <!-- Saatlik / Günlük Toggle -->
+        <div class="sure-toggle" *ngIf="arac.saatlik_fiyat"
+          [class.gunluk-aktif]="kiralamaModuSure === 'gunluk'">
+          <button class="sure-toggle-btn" [class.aktif]="kiralamaModuSure === 'saatlik'"
+            (click)="kiralamaModuSure = 'saatlik'">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            Saatlik
+          </button>
+          <button class="sure-toggle-btn" [class.aktif]="kiralamaModuSure === 'gunluk'"
+            (click)="kiralamaModuSure = 'gunluk'">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            Günlük
+          </button>
+        </div>
+
+        <!-- Saatlik hızlı seçimler -->
+        <div class="hizli-secimler" *ngIf="kiralamaModuSure === 'saatlik'">
+          <button class="hizli-btn" [class.secili]="seciliSaatSayisi === 1" (click)="seciliSaatSayisi = 1">1 Saat</button>
+          <button class="hizli-btn" [class.secili]="seciliSaatSayisi === 3" (click)="seciliSaatSayisi = 3">3 Saat</button>
+          <button class="hizli-btn" [class.secili]="seciliSaatSayisi === 7" (click)="seciliSaatSayisi = 7">7 Saat</button>
+          <button class="hizli-btn" [class.secili]="seciliSaatSayisi === 12" (click)="seciliSaatSayisi = 12">12 Saat</button>
+        </div>
+
+        <!-- Günlük hızlı seçimler -->
+        <div class="hizli-secimler" *ngIf="kiralamaModuSure === 'gunluk'">
+          <button class="hizli-btn" [class.secili]="seciliGunSayisi === 1" (click)="seciliGunSayisi = 1">1 Gün</button>
+          <button class="hizli-btn" [class.secili]="seciliGunSayisi === 3" (click)="seciliGunSayisi = 3">
+            3 Gün
+            <span class="populer-rozet">Popüler</span>
+          </button>
+          <button class="hizli-btn" [class.secili]="seciliGunSayisi === 7" (click)="seciliGunSayisi = 7">7 Gün</button>
+          <button class="hizli-btn" [class.secili]="seciliGunSayisi === 30" (click)="seciliGunSayisi = 30">30 Gün</button>
+        </div>
+
+        <!-- Saatlik stepper -->
+        <div class="gun-secici" *ngIf="kiralamaModuSure === 'saatlik'">
+          <button class="gun-adim-btn" (click)="saatAzalt()" [disabled]="seciliSaatSayisi <= 1">−</button>
+          <div class="gun-merkez">
+            <span class="gun-sayi">{{ seciliSaatSayisi }}</span>
+            <span class="gun-metin">saat</span>
+          </div>
+          <button class="gun-adim-btn" (click)="saatArtir()" [disabled]="seciliSaatSayisi >= 24">+</button>
+        </div>
+
+        <!-- Günlük stepper -->
+        <div class="gun-secici" *ngIf="kiralamaModuSure === 'gunluk'">
+          <button class="gun-adim-btn" (click)="gunAzalt()" [disabled]="seciliGunSayisi <= 1">−</button>
+          <div class="gun-merkez">
+            <span class="gun-sayi">{{ seciliGunSayisi }}</span>
+            <span class="gun-metin">gün</span>
+          </div>
+          <button class="gun-adim-btn" (click)="gunArtir()" [disabled]="seciliGunSayisi >= 30">+</button>
+        </div>
+
+        <div class="toplam-banner">
+          <div class="toplam-sol">
+            <span class="toplam-etiket" *ngIf="kiralamaModuSure === 'saatlik'">
+              {{ seciliSaatSayisi }} saat × ₺{{ arac.saatlik_fiyat | number:'1.0-0' }}
+            </span>
+            <span class="toplam-etiket" *ngIf="kiralamaModuSure === 'gunluk'">
+              {{ seciliGunSayisi }} gün × ₺{{ arac.gunluk_fiyat | number:'1.0-0' }}
+            </span>
+            <span class="toplam-tutar">₺{{ toplamFiyat | number:'1.0-0' }}</span>
+          </div>
+          <span class="toplam-not">tahmini toplam</span>
+        </div>
+      </div>
+
+      <!-- Değerlendirmeler -->
+      <div class="degerlendirme-kisim">
+        <div class="degerlendirme-baslik-satir">
+          <h3 class="kisim-baslik">Değerlendirmeler</h3>
+          <div class="ortalama-ozet" *ngIf="degerlendirmeOzet.adet > 0">
+            <ion-icon name="star"></ion-icon>
+            <span class="oo-deger">{{ degerlendirmeOzet.ortalama }}</span>
+            <span class="oo-adet">· {{ degerlendirmeOzet.adet }} değerlendirme</span>
+          </div>
+        </div>
+
+        <!-- Değerlendir / düzenle butonu -->
+        <button class="degerlendir-btn"
+          *ngIf="degerlendirmeOzet.degerlendirebilir && !degerlendirmeFormAcik"
+          (click)="degerlendirmeFormAc()">
+          <ion-icon [name]="benimDegerlendirme ? 'create-outline' : 'star-outline'"></ion-icon>
+          {{ benimDegerlendirme ? 'Değerlendirmeni düzenle' : 'Bu aracı değerlendir' }}
+        </button>
+
+        <!-- Form -->
+        <div class="degerlendirme-form" *ngIf="degerlendirmeFormAcik">
+          <div class="yildiz-secici">
+            <ion-icon *ngFor="let n of yildizlar"
+              [name]="n <= yeniPuan ? 'star' : 'star-outline'"
+              (click)="puanSec(n)"></ion-icon>
+          </div>
+          <textarea class="yorum-input" [(ngModel)]="yeniYorum" rows="3" maxlength="1000"
+            placeholder="Deneyimini birkaç kelimeyle anlat (opsiyonel)"></textarea>
+          <div class="form-aksiyon">
+            <button class="iptal-btn" (click)="degerlendirmeFormKapat()">Vazgeç</button>
+            <button class="sil-btn" *ngIf="benimDegerlendirme" (click)="degerlendirmeSilOnay()" aria-label="Sil">
+              <ion-icon name="trash-outline"></ion-icon>
+            </button>
+            <button class="gonder-btn" [disabled]="degerlendirmeGonderiliyor || yeniPuan < 1"
+              (click)="degerlendirmeGonder()">
+              {{ degerlendirmeGonderiliyor ? 'Kaydediliyor...' : 'Kaydet' }}
+            </button>
+          </div>
+        </div>
+
+        <!-- Liste -->
+        <div class="degerlendirme-liste" *ngIf="degerlendirmeOzet.liste.length > 0">
+          <div class="degerlendirme-kart" *ngFor="let d of degerlendirmeOzet.liste">
+            <div class="dk-ust">
+              <span class="dk-isim">{{ d.isim }}<span class="dk-ben" *ngIf="d.benimMi"> · Sen</span></span>
+              <div class="dk-yildiz">
+                <ion-icon *ngFor="let n of yildizlar" [name]="n <= d.puan ? 'star' : 'star-outline'"></ion-icon>
+              </div>
+            </div>
+            <p class="dk-yorum" *ngIf="d.yorum">{{ d.yorum }}</p>
+            <p class="dk-tarih">{{ d.tarih | date:'dd.MM.yyyy' }}</p>
+          </div>
+        </div>
+
+        <!-- Boş durum -->
+        <p class="degerlendirme-bos"
+          *ngIf="degerlendirmeOzet.adet === 0 && !degerlendirmeFormAcik">
+          {{ degerlendirmeOzet.degerlendirebilir ? 'İlk değerlendirmeyi sen yap!' : 'Henüz değerlendirme yok.' }}
+        </p>
+      </div>
+
+      <!-- Benzer Araçlar -->
+      <div class="benzer-kisim" *ngIf="benzerAraclar.length > 0">
+        <h3 class="kisim-baslik">Benzer Araçlar</h3>
+        <div class="benzer-scroll">
+          <div class="benzer-kart" *ngFor="let b of benzerAraclar" (click)="benzerAracaGit(b.id)">
+            <div class="benzer-resim">
+              <img *ngIf="b.resim_url" [src]="b.resim_url" [alt]="b.marka" />
+              <ion-icon *ngIf="!b.resim_url" name="car-outline"></ion-icon>
+            </div>
+            <div class="benzer-bilgi">
+              <p class="benzer-marka">{{ b.marka }}</p>
+              <p class="benzer-model">{{ b.model }}</p>
+              <p class="benzer-fiyat">₺{{ b.gunluk_fiyat }}/gün</p>
+            </div>
+            <span class="benzer-durum" [class.musait]="b.musait" [class.dolu]="!b.musait">
+              {{ b.musait ? 'Müsait' : 'Dolu' }}
+            </span>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 
@@ -60,16 +242,45 @@
     <button class="back-link" (click)="geri()">Geri dön</button>
   </div>
 
-  <div class="rent-bar" *ngIf="!yukleniyor && arac">
-    <div class="price">
-      <span class="amount">₺{{ arac.gunluk_fiyat }}</span>
-      <span class="period">/ gün</span>
-    </div>
-    <button
-      class="rent-btn"
-      [disabled]="!arac.musait || !!aktifKiralama"
-      (click)="kirala()">
-      {{ !arac.musait ? 'Müsait Değil' : (aktifKiralama ? 'Aktif Kiralaman Var' : 'Kirala →') }}
-    </button>
-  </div>
+  <!-- Kiralama Onay Modalı -->
+  <app-rental-summary-modal
+    [acik]="onayModalAcik"
+    [aracAdi]="(arac?.marka || '') + ' ' + (arac?.model || '')"
+    [tur]="kiralamaSecimi || 'gunluk'"
+    [sureMetni]="odemeOzetMetni"
+    [toplam]="toplamFiyat"
+    (vazgec)="onayVazgec()"
+    (onayla)="onayOnayla()"
+  ></app-rental-summary-modal>
+
+  <!-- Sözleşme Modal'ı -->
+  <app-agreement-modal
+    [acik]="agreementModalOpen"
+    [gunlukFiyat]="arac?.gunluk_fiyat"
+    (kabul)="acceptAgreement()"
+    (reddet)="rejectAgreement()"
+  ></app-agreement-modal>
+
+  <!-- Ödeme Modalı -->
+  <app-payment-modal
+    [acik]="odemeAcik"
+    [aracMetin]="odemeAracMetni"
+    [ozetMetin]="odemeOzetMetni"
+    [toplamTutar]="odemeToplamTutar"
+    [durum]="odemeDurum"
+    [hataMesaji]="odemeHataMesaji"
+    (kapat)="odemeKapat()"
+    (onayla)="odemeOnayla($event)"
+    (tamamlandi)="odemeTamamlandi()"
+  ></app-payment-modal>
+
+  <!-- Başlangıç Checklist'i (ödeme sonrası) -->
+  <app-rental-checklist
+    [acik]="baslangicChecklistAcik"
+    [adimlar]="baslangicChecklistAdimlari"
+    [devamMetni]="'Devam Et'"
+    [bitisMetni]="'Yola Çıkıyorum'"
+    (tamamlandi)="baslangicChecklistTamam()"
+    (kapat)="baslangicChecklistKapat()"
+  ></app-rental-checklist>
 </ion-content>

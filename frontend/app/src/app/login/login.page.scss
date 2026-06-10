@@ -262,3 +262,41 @@ ion-content {
     }
   }
 }
+
+/* ---- Giriş animasyonları ---- */
+.hero-section { animation: drvFadeUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) backwards; }
+
+.input-group  { animation: drvFadeUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.1s backwards; }
+.input-group + .input-group { animation-delay: 0.18s; }
+
+.login-btn    { animation: drvFadeUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.26s backwards; }
+.register-text,
+.divider,
+.social-row   { animation: drvFade 0.6s ease 0.34s backwards; }
+
+/* ---- Responsive ---- */
+/* Tablet & masaüstü: tüm giriş kolonunu ortala, kart benzeri tek sütun yap */
+@media (min-width: 768px) {
+  .login-wrapper {
+    max-width: 480px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  .hero-section { height: 340px; }
+}
+
+/* Küçük telefonlar (≤360px): hero ve başlık ölçeklerini düşür */
+@media (max-width: 360px) {
+  .hero-section {
+    height: 240px;
+
+    .hero-overlay h1 { font-size: 26px; }
+  }
+
+  .form-section { padding: 24px 20px 32px; }
+
+  .social-row {
+    flex-direction: column;
+  }
+}

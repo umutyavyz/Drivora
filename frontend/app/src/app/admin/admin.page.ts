@@ -1,28 +1,38 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { environment } from '../../environments/environment';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { IonContent, IonIcon, IonSpinner, ToastController, AlertController } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import {
   addOutline,
+  barChartOutline,
   carOutline,
+  cashOutline,
   checkmarkOutline,
   closeOutline,
   createOutline,
+  homeOutline,
   keyOutline,
+  logOutOutline,
   mailOutline,
   peopleOutline,
+  personOutline,
   searchOutline,
   settingsOutline,
   shieldOutline,
   timeOutline,
-  trashOutline
+  trashOutline,
+  trophyOutline
 } from 'ionicons/icons';
 import { jwtDecode } from 'jwt-decode';
 
-type AdminSekme = 'araclar' | 'kullanicilar' | 'kiralamalar';
+type AdminSekme = 'araclar' | 'kullanicilar' | 'kiralamalar' | 'istatistikler';
+type AltSekme = 'panel' | 'istatistik' | 'profil';
 type KiralamaSekmesi = 'aktif' | 'tamamlandi';
 type KullaniciRol = 'kullanici' | 'admin';
 
@@ -32,8 +42,11 @@ interface Arac {
   model: string;
   musait: boolean;
   gunluk_fiyat: number;
+  saatlik_fiyat?: number | null;
   resim_url?: string | null;
+  resim_urls?: string[] | null;
   kategori?: string | null;
+  kasa_tipi?: string | null;
   yakit?: string | null;
   vites?: string | null;
 }
@@ -43,6 +56,8 @@ interface Kullanici {
   email: string;
   rol: KullaniciRol;
   ad_soyad?: string | null;
+  telefon?: string | null;
+  dogum_tarihi?: string | null;
 }
 
 interface KiralamaKaydi {
@@ -65,12 +80,17 @@ interface KiralamaKaydi {
   standalone: true,
   imports: [CommonModule, FormsModule, IonContent, IonIcon, IonSpinner],
 })
-export class AdminPage implements OnInit {
-  private readonly API_BASE = 'http://localhost:3000';
+export class AdminPage implements OnInit, OnDestroy {
+  private readonly API_BASE = environment.API_BASE;
+  private destroy$ = new Subject<void>();
 
   isAdmin = false;
   aktifSekme: AdminSekme = 'araclar';
   aktifKiralamaSekmesi: KiralamaSekmesi = 'aktif';
+  altSekme: AltSekme = 'panel';
+  adminEmail = '';
+  adminAd = '';
+  adminTokenExp: Date | null = null;
 
   araclar: Arac[] = [];
   kullanicilar: Kullanici[] = [];
@@ -79,6 +99,9 @@ export class AdminPage implements OnInit {
   yukleniyorAraclar = false;
   yukleniyorKullanicilar = false;
   yukleniyorKiralamalar = false;
+  araclarYuklendi = false;
+  kullanicilarYuklendi = false;
+  kiralamalarYuklendi = false;
 
   aramaMetniArac = '';
   aramaMetniKullanici = '';
@@ -92,10 +115,13 @@ export class AdminPage implements OnInit {
     marka: '',
     model: '',
     gunluk_fiyat: 1000,
-    kategori: 'Sedan',
+    saatlik_fiyat: null,
+    kategori: 'Ekonomik',
+    kasa_tipi: 'Sedan',
     yakit: 'Benzin',
     vites: 'Otomatik',
     resim_url: '',
+    resim_urls_metin: '',
     musait: true
   };
 
@@ -106,10 +132,14 @@ export class AdminPage implements OnInit {
     ad_soyad: '',
     email: '',
     sifre: '',
-    rol: 'kullanici'
+    rol: 'kullanici',
+    telefon: '',
+    dogum_tarihi: ''
   };
+  bugun = (() => { const d = new Date(); d.setFullYear(d.getFullYear() - 18); return d.toISOString().split('T')[0]; })();
 
-  kategoriler = ['Spor', 'Sedan', 'Ekonomik'];
+  kategoriler = ['Ekonomik', 'Orta Sınıf', 'Lüks', 'Spor', 'Elektrikli', 'Manuel', 'Otomatik'];
+  kasaTipleri = ['Hatchback', 'Sedan', 'SUV', 'Spor'];
   yakitlar = ['Benzin', 'Dizel', 'Hibrit', 'Elektrik'];
   vitesler = ['Manuel', 'Otomatik'];
   roller: KullaniciRol[] = ['kullanici', 'admin'];
@@ -121,45 +151,62 @@ export class AdminPage implements OnInit {
     private alertCtrl: AlertController
   ) {
     addIcons({
-      addOutline,
-      createOutline,
-      trashOutline,
-      carOutline,
-      closeOutline,
-      checkmarkOutline,
-      searchOutline,
-      peopleOutline,
-      keyOutline,
-      settingsOutline,
-      mailOutline,
-      shieldOutline,
-      timeOutline
+      addOutline, barChartOutline, carOutline, cashOutline, checkmarkOutline,
+      closeOutline, createOutline, homeOutline, keyOutline, logOutOutline,
+      mailOutline, peopleOutline, personOutline, searchOutline, settingsOutline,
+      shieldOutline, timeOutline, trashOutline, trophyOutline
     });
   }
 
   ngOnInit() {
     this.rolKontrol();
+    if (this.isAdmin) {
+      this.tumVerileriYukle();
+    }
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   ionViewWillEnter() {
     this.rolKontrol();
-    if (this.isAdmin) {
-      this.verileriYukle();
+    if (!this.isAdmin) return;
+    if (!this.araclarYuklendi && !this.kullanicilarYuklendi && !this.kiralamalarYuklendi) {
+      this.tumVerileriYukle();
     }
   }
 
+  private tumVerileriYukle() {
+    this.sekmeVerisiniYukle('araclar');
+    this.sekmeVerisiniYukle('kullanicilar');
+    this.sekmeVerisiniYukle('kiralamalar');
+  }
+
+  get headerBasligi(): string {
+    if (this.altSekme === 'istatistik') return 'İstatistikler';
+    if (this.altSekme === 'profil') return 'Profil';
+    return 'Admin Paneli';
+  }
+
   get panelAltBaslik(): string {
-    if (this.aktifSekme === 'araclar') {
-      return `${this.araclar.length} araç kayıtlı`;
-    }
-    if (this.aktifSekme === 'kullanicilar') {
-      return `${this.kullanicilar.length} kullanıcı kayıtlı`;
-    }
+    if (this.altSekme === 'istatistik') return 'Genel istatistikler';
+    if (this.altSekme === 'profil') return 'Hesap bilgileri';
+    if (this.aktifSekme === 'araclar') return `${this.araclar.length} araç kayıtlı`;
+    if (this.aktifSekme === 'kullanicilar') return `${this.kullanicilar.length} kullanıcı kayıtlı`;
     return `${this.filtrelenmisKiralamalar().length} kiralama gösteriliyor`;
   }
 
   sekmeDegistir(sekme: AdminSekme) {
     this.aktifSekme = sekme;
+    if (sekme === 'istatistikler') {
+      if (!this.araclarYuklendi) this.araclariGetir();
+      if (!this.kullanicilarYuklendi) this.kullanicilariGetir();
+      if (!this.kiralamalarYuklendi) this.kiralamalariGetir();
+      return;
+    }
+    this.sekmeVerisiniYukle(sekme);
   }
 
   kiralamaSekmesiDegistir(sekme: KiralamaSekmesi) {
@@ -182,6 +229,9 @@ export class AdminPage implements OnInit {
       try {
         const decoded: any = jwtDecode(token);
         this.isAdmin = decoded.rol === 'admin';
+        this.adminEmail = decoded.email || '';
+        this.adminAd = decoded.ad_soyad || '';
+        this.adminTokenExp = decoded.exp ? new Date(decoded.exp * 1000) : null;
       } catch {
         this.isAdmin = false;
       }
@@ -194,9 +244,22 @@ export class AdminPage implements OnInit {
     }
   }
 
-  private getHeaders(): HttpHeaders {
-    const token = localStorage.getItem('token');
-    return new HttpHeaders({ Authorization: `Bearer ${token}` });
+  altSekmeDegistir(sekme: AltSekme) {
+    this.altSekme = sekme;
+    if (sekme === 'istatistik') {
+      if (!this.araclarYuklendi) this.araclariGetir();
+      if (!this.kullanicilarYuklendi) this.kullanicilariGetir();
+      if (!this.kiralamalarYuklendi) this.kiralamalariGetir();
+    }
+  }
+
+  uygulamayaDon() {
+    this.router.navigate(['/tabs/map']);
+  }
+
+  cikisYap() {
+    localStorage.removeItem('token');
+    this.router.navigate(['/login']);
   }
 
   private async toastGoster(message: string, color: 'success' | 'danger' | 'warning', duration = 2200) {
@@ -209,18 +272,36 @@ export class AdminPage implements OnInit {
     await toast.present();
   }
 
-  verileriYukle() {
-    this.araclariGetir();
-    this.kullanicilariGetir();
+  private sekmeVerisiniYukle(sekme: AdminSekme, force = false) {
+    if (sekme === 'istatistikler') return;
+    if (sekme === 'araclar') {
+      if (this.yukleniyorAraclar) return;
+      if (!force && this.araclarYuklendi) return;
+      this.araclariGetir();
+      return;
+    }
+
+    if (sekme === 'kullanicilar') {
+      if (this.yukleniyorKullanicilar) return;
+      if (!force && this.kullanicilarYuklendi) return;
+      this.kullanicilariGetir();
+      return;
+    }
+
+    if (this.yukleniyorKiralamalar) return;
+    if (!force && this.kiralamalarYuklendi) return;
     this.kiralamalariGetir();
   }
 
   // Araçlar
   araclariGetir() {
     this.yukleniyorAraclar = true;
-    this.http.get<Arac[]>(`${this.API_BASE}/araclar`, { headers: this.getHeaders() }).subscribe({
+    this.http.get<Arac[]>(`${this.API_BASE}/araclar`).pipe(
+      takeUntil(this.destroy$)
+    ).subscribe({
       next: (data) => {
         this.araclar = data;
+        this.araclarYuklendi = true;
         this.yukleniyorAraclar = false;
       },
       error: async () => {
@@ -253,10 +334,13 @@ export class AdminPage implements OnInit {
       marka: '',
       model: '',
       gunluk_fiyat: 1000,
-      kategori: 'Sedan',
+      saatlik_fiyat: null,
+      kategori: 'Ekonomik',
+      kasa_tipi: 'Sedan',
       yakit: 'Benzin',
       vites: 'Otomatik',
       resim_url: '',
+      resim_urls_metin: '',
       musait: true
     };
     this.aracFormAcik = true;
@@ -269,17 +353,31 @@ export class AdminPage implements OnInit {
       marka: arac.marka,
       model: arac.model,
       gunluk_fiyat: arac.gunluk_fiyat,
-      kategori: arac.kategori || 'Sedan',
+      saatlik_fiyat: arac.saatlik_fiyat || null,
+      kategori: arac.kategori || 'Ekonomik',
+      kasa_tipi: arac.kasa_tipi || 'Sedan',
       yakit: arac.yakit || 'Benzin',
       vites: arac.vites || 'Otomatik',
       resim_url: arac.resim_url || '',
+      resim_urls_metin: (arac.resim_urls || []).join('\n'),
       musait: arac.musait
     };
     this.aracFormAcik = true;
   }
 
+  private resimUrlsParseEt(): string[] | null {
+    const metin: string = this.aracFormVerisi.resim_urls_metin || '';
+    const liste = metin.split('\n').map((u: string) => u.trim()).filter((u: string) => u.length > 0);
+    return liste.length > 0 ? liste : null;
+  }
+
   aracFormuKapat() {
     this.aracFormAcik = false;
+  }
+
+  toggleMusaitlikFormda() {
+    // Sadece toggle yap, kontrol güncelle butonunda yapılacak
+    this.aracFormVerisi.musait = !this.aracFormVerisi.musait;
   }
 
   async aracFormuKaydet() {
@@ -292,28 +390,55 @@ export class AdminPage implements OnInit {
       marka: this.aracFormVerisi.marka.trim(),
       model: this.aracFormVerisi.model.trim(),
       gunluk_fiyat: this.aracFormVerisi.gunluk_fiyat,
+      saatlik_fiyat: this.aracFormVerisi.saatlik_fiyat || null,
       kategori: this.aracFormVerisi.kategori,
+      kasa_tipi: this.aracFormVerisi.kasa_tipi,
       yakit: this.aracFormVerisi.yakit,
       vites: this.aracFormVerisi.vites,
       resim_url: this.aracFormVerisi.resim_url.trim() || null,
+      resim_urls: this.resimUrlsParseEt(),
       musait: this.aracFormVerisi.musait
     };
 
     if (this.aracDuzenleModu) {
-      this.http.put(`${this.API_BASE}/araclar/${this.aracFormVerisi.id}`, body, { headers: this.getHeaders() }).subscribe({
-        next: () => {
-          this.aracFormAcik = false;
-          this.araclariGetir();
-          this.toastGoster('Araç güncellendi', 'success');
-        },
-        error: (err) => {
-          this.toastGoster(err.error?.hata || 'Araç güncellenemedi', 'danger');
+      // Eski aracı bul
+      const eskiArac = this.araclar.find(a => a.id === this.aracFormVerisi.id);
+      
+      // Dolu→müsait geçişi kontrol et
+      if (eskiArac && !eskiArac.musait && this.aracFormVerisi.musait) {
+        // Dolu idi, müsait yapılıyor → kiralama kontrol et
+        const aktifKiralama = this.kiralamalar.find(
+          k => k.arac_id === this.aracFormVerisi.id && k.durum === 'aktif'
+        );
+
+        if (aktifKiralama) {
+          const alert = await this.alertCtrl.create({
+            header: 'Araç Müsaitlik Değiştirme',
+            message: `Bu araç şuan "${aktifKiralama.kullanici_email}" kişisi tarafından kiralandı. Müsaitlik durumunu değiştirmek ister misiniz?\n\nEvet derse kiralama otomatik olarak sonlandırılacaktır.`,
+            buttons: [
+              { text: 'Vazgeç', role: 'cancel' },
+              {
+                text: 'Evet, değiştir',
+                role: 'destructive',
+                handler: () => {
+                  this.aracGuncelleVeKiralamaBitir(body, aktifKiralama);
+                }
+              }
+            ]
+          });
+          await alert.present();
+          return;
         }
-      });
+      }
+
+      // Alert çıkmadı, direkt güncelle
+      this.aracGuncelleYap(body);
       return;
     }
 
-    this.http.post(`${this.API_BASE}/araclar`, body, { headers: this.getHeaders() }).subscribe({
+    this.http.post(`${this.API_BASE}/araclar`, body).pipe(
+      takeUntil(this.destroy$)
+    ).subscribe({
       next: () => {
         this.aracFormAcik = false;
         this.araclariGetir();
@@ -353,7 +478,9 @@ export class AdminPage implements OnInit {
   }
 
   aracSilIstegiGonder(id: number) {
-    this.http.delete(`${this.API_BASE}/araclar/${id}`, { headers: this.getHeaders() }).subscribe({
+    this.http.delete(`${this.API_BASE}/araclar/${id}`).pipe(
+      takeUntil(this.destroy$)
+    ).subscribe({
       next: () => {
         this.araclar = this.araclar.filter(a => a.id !== id);
         this.toastGoster('Araç silindi', 'success');
@@ -364,11 +491,119 @@ export class AdminPage implements OnInit {
     });
   }
 
-  musaitlikDegistir(arac: Arac) {
-    const body = { musait: !arac.musait };
-    this.http.put(`${this.API_BASE}/araclar/${arac.id}`, body, { headers: this.getHeaders() }).subscribe({
+  private aracGuncelleYap(body: any) {
+    this.http.put(`${this.API_BASE}/araclar/${this.aracFormVerisi.id}`, body).pipe(
+      takeUntil(this.destroy$)
+    ).subscribe({
+      next: () => {
+        this.aracFormAcik = false;
+        this.araclariGetir();
+        this.toastGoster('Araç güncellendi', 'success');
+      },
+      error: (err) => {
+        this.toastGoster(err.error?.hata || 'Araç güncellenemedi', 'danger');
+      }
+    });
+  }
+
+  private aracGuncelleVeKiralamaBitir(body: any, kiralama: KiralamaKaydi) {
+    // Admin endpoint'ini kullan: /kiralamalar/admin/:id/bitir
+    this.http.put(`${this.API_BASE}/kiralamalar/admin/${kiralama.id}/bitir`, {}).pipe(
+      takeUntil(this.destroy$)
+    ).subscribe({
+      next: () => {
+        // Kiralama bitti, şimdi araç güncelle
+        this.aracGuncelleYap(body);
+        this.toastGoster('Kiralama sonlandırıldı', 'success');
+      },
+      error: (err) => {
+        this.toastGoster(err.error?.hata || 'Kiralama sonlandırılamadı', 'danger');
+      }
+    });
+  }
+
+  async musaitlikDegistir(arac: Arac): Promise<void> {
+    // Dolu olan araç (musait=false) varsa ve değiştirilmek isteniyorsa kontrol et
+    if (!arac.musait) {
+      // Kiralamalar listesini güncel al, sonra kontrol et
+      return new Promise<void>((resolve) => {
+        this.http.get<KiralamaKaydi[]>(`${this.API_BASE}/kiralamalar/admin`).pipe(
+          takeUntil(this.destroy$)
+        ).subscribe({
+          next: async (kiralamalar) => {
+            const aktifKiralama = kiralamalar.find(k => k.arac_id === arac.id && k.durum === 'aktif');
+            
+            if (aktifKiralama) {
+              const alert = await this.alertCtrl.create({
+                header: 'Araç Müsaitlik Değiştirme',
+                message: `Bu araç şuan "${aktifKiralama.kullanici_email}" kişisi tarafından kiralandı. Aracın müsaitlik durumunu değiştirmek ister misiniz?\n\nEvet derse kiralama otomatik olarak sonlandırılacaktır.`,
+                buttons: [
+                  { text: 'Vazgeç', role: 'cancel' },
+                  {
+                    text: 'Evet, değiştir',
+                    role: 'destructive',
+                    handler: () => {
+                      this.musaitlikDegistirVeKiralamaBitir(arac, aktifKiralama);
+                      resolve();
+                    }
+                  }
+                ]
+              });
+              await alert.present();
+              resolve();
+            } else {
+              // Alert çıkmadı, direkt değiştir
+              this.musaitlikDegistirDirekt(arac);
+              resolve();
+            }
+          },
+          error: async () => {
+            await this.toastGoster('Kiralamalar alınamadı', 'danger');
+            resolve();
+          }
+        });
+      });
+    }
+
+    // Müsait araç ise direkt değiştir
+    this.musaitlikDegistirDirekt(arac);
+    return;
+  }
+
+  private musaitlikDegistirDirekt(arac: Arac) {
+    const body = { musait: !arac.musait, resim_urls: arac.resim_urls || null };
+    this.http.put(`${this.API_BASE}/araclar/${arac.id}`, body).pipe(
+      takeUntil(this.destroy$)
+    ).subscribe({
       next: () => {
         arac.musait = !arac.musait;
+      }
+    });
+  }
+
+  private musaitlikDegistirVeKiralamaBitir(arac: Arac, kiralama: KiralamaKaydi) {
+    // Admin endpoint'ini kullan: /kiralamalar/admin/:id/bitir (kullanıcı kontrolü yok)
+    this.http.put(`${this.API_BASE}/kiralamalar/admin/${kiralama.id}/bitir`, {}).pipe(
+      takeUntil(this.destroy$)
+    ).subscribe({
+      next: () => {
+        // Kiralama bitti, şimdi aracın müsaitliğini değiştir
+        const body = { musait: !arac.musait, resim_urls: arac.resim_urls || null };
+        this.http.put(`${this.API_BASE}/araclar/${arac.id}`, body).pipe(
+          takeUntil(this.destroy$)
+        ).subscribe({
+          next: () => {
+            arac.musait = !arac.musait;
+            this.kiralamalariGetir(); // Kiralamalar listesini yenile
+            this.toastGoster('Kiralama sonlandırıldı ve araç müsaitliği güncellendi', 'success');
+          },
+          error: (err) => {
+            this.toastGoster(err.error?.hata || 'Araç müsaitliği güncellenemedi', 'danger');
+          }
+        });
+      },
+      error: (err) => {
+        this.toastGoster(err.error?.hata || 'Kiralama sonlandırılamadı', 'danger');
       }
     });
   }
@@ -376,9 +611,12 @@ export class AdminPage implements OnInit {
   // Kullanıcılar
   kullanicilariGetir() {
     this.yukleniyorKullanicilar = true;
-    this.http.get<Kullanici[]>(`${this.API_BASE}/kullanicilar`, { headers: this.getHeaders() }).subscribe({
+    this.http.get<Kullanici[]>(`${this.API_BASE}/kullanicilar`).pipe(
+      takeUntil(this.destroy$)
+    ).subscribe({
       next: (data) => {
         this.kullanicilar = data;
+        this.kullanicilarYuklendi = true;
         this.yukleniyorKullanicilar = false;
       },
       error: async () => {
@@ -404,7 +642,9 @@ export class AdminPage implements OnInit {
       ad_soyad: '',
       email: '',
       sifre: '',
-      rol: 'kullanici'
+      rol: 'kullanici',
+      telefon: '',
+      dogum_tarihi: ''
     };
     this.kullaniciFormAcik = true;
   }
@@ -416,7 +656,9 @@ export class AdminPage implements OnInit {
       ad_soyad: kullanici.ad_soyad || '',
       email: kullanici.email,
       sifre: '',
-      rol: kullanici.rol
+      rol: kullanici.rol,
+      telefon: kullanici.telefon || '',
+      dogum_tarihi: kullanici.dogum_tarihi ? kullanici.dogum_tarihi.split('T')[0] : ''
     };
     this.kullaniciFormAcik = true;
   }
@@ -443,10 +685,16 @@ export class AdminPage implements OnInit {
     const ad_soyad = this.kullaniciFormVerisi.ad_soyad?.trim() || null;
 
     if (this.kullaniciDuzenleModu) {
-      const body: any = { email, rol, ad_soyad };
+      const body: any = {
+        email, rol, ad_soyad,
+        telefon: this.kullaniciFormVerisi.telefon?.trim() || null,
+        dogum_tarihi: this.kullaniciFormVerisi.dogum_tarihi || null
+      };
       if (sifre) body.sifre = sifre;
 
-      this.http.put(`${this.API_BASE}/kullanicilar/${this.kullaniciFormVerisi.id}`, body, { headers: this.getHeaders() }).subscribe({
+      this.http.put(`${this.API_BASE}/kullanicilar/${this.kullaniciFormVerisi.id}`, body).pipe(
+        takeUntil(this.destroy$)
+      ).subscribe({
         next: () => {
           this.kullaniciFormAcik = false;
           this.kullanicilariGetir();
@@ -459,7 +707,9 @@ export class AdminPage implements OnInit {
       return;
     }
 
-    this.http.post(`${this.API_BASE}/kullanicilar`, { email, sifre, rol, ad_soyad }, { headers: this.getHeaders() }).subscribe({
+    this.http.post(`${this.API_BASE}/kullanicilar`, { email, sifre, rol, ad_soyad }).pipe(
+      takeUntil(this.destroy$)
+    ).subscribe({
       next: () => {
         this.kullaniciFormAcik = false;
         this.kullanicilariGetir();
@@ -488,7 +738,9 @@ export class AdminPage implements OnInit {
   }
 
   kullaniciSilIstegiGonder(id: number) {
-    this.http.delete(`${this.API_BASE}/kullanicilar/${id}`, { headers: this.getHeaders() }).subscribe({
+    this.http.delete(`${this.API_BASE}/kullanicilar/${id}`).pipe(
+      takeUntil(this.destroy$)
+    ).subscribe({
       next: () => {
         this.kullanicilar = this.kullanicilar.filter(k => k.id !== id);
         this.toastGoster('Kullanıcı silindi', 'success');
@@ -502,9 +754,12 @@ export class AdminPage implements OnInit {
   // Kiralamalar
   kiralamalariGetir() {
     this.yukleniyorKiralamalar = true;
-    this.http.get<KiralamaKaydi[]>(`${this.API_BASE}/kiralamalar/admin`, { headers: this.getHeaders() }).subscribe({
+    this.http.get<KiralamaKaydi[]>(`${this.API_BASE}/kiralamalar/admin`).pipe(
+      takeUntil(this.destroy$)
+    ).subscribe({
       next: (data) => {
         this.kiralamalar = data;
+        this.kiralamalarYuklendi = true;
         this.yukleniyorKiralamalar = false;
       },
       error: async () => {
@@ -526,6 +781,70 @@ export class AdminPage implements OnInit {
       k.marka?.toLowerCase().includes(arama) ||
       k.model?.toLowerCase().includes(arama)
     );
+  }
+
+  // Profil getters
+  get aktifKiralamaSayisi(): number {
+    return this.kiralamalar.filter(k => k.durum === 'aktif').length;
+  }
+
+  oturumSuresiFormatla(): string {
+    if (!this.adminTokenExp) return 'Bilinmiyor';
+    const simdi = new Date();
+    const fark = this.adminTokenExp.getTime() - simdi.getTime();
+    if (fark <= 0) return 'Süresi dolmuş';
+    const gun = Math.floor(fark / 86400000);
+    const saat = Math.floor((fark % 86400000) / 3600000);
+    if (gun > 0) return `${gun} gün ${saat} saat kaldı`;
+    const dakika = Math.floor((fark % 3600000) / 60000);
+    return `${saat} saat ${dakika} dk kaldı`;
+  }
+
+  // İstatistik getters
+  get musaitAracSayisi(): number {
+    return this.araclar.filter(a => a.musait).length;
+  }
+
+  get toplamGelir(): number {
+    return this.kiralamalar
+      .filter(k => k.durum === 'tamamlandi' && !!k.bitis_tarihi)
+      .reduce((sum, k) => {
+        const gun = Math.max(1, Math.ceil(
+          (new Date(k.bitis_tarihi as string).getTime() - new Date(k.baslangic_tarihi).getTime()) / 86400000
+        ));
+        return sum + gun * k.gunluk_fiyat;
+      }, 0);
+  }
+
+  get enCokKiralananAraclar(): { marka: string; model: string; sayi: number }[] {
+    const sayac: Record<number, { marka: string; model: string; sayi: number }> = {};
+    this.kiralamalar.forEach(k => {
+      if (!sayac[k.arac_id]) sayac[k.arac_id] = { marka: k.marka, model: k.model, sayi: 0 };
+      sayac[k.arac_id].sayi++;
+    });
+    return Object.values(sayac).sort((a, b) => b.sayi - a.sayi).slice(0, 5);
+  }
+
+  get enAktifKullanicilar(): { email: string; sayi: number }[] {
+    const sayac: Record<string, { email: string; sayi: number }> = {};
+    this.kiralamalar.forEach(k => {
+      if (!sayac[k.kullanici_email]) sayac[k.kullanici_email] = { email: k.kullanici_email, sayi: 0 };
+      sayac[k.kullanici_email].sayi++;
+    });
+    return Object.values(sayac).sort((a, b) => b.sayi - a.sayi).slice(0, 5);
+  }
+
+  get gelirTablosu(): { marka: string; model: string; kullanici_email: string; gun: number; gelir: number; tarih: string }[] {
+    return this.kiralamalar
+      .filter(k => k.durum === 'tamamlandi' && !!k.bitis_tarihi)
+      .map(k => {
+        const gun = Math.max(1, Math.ceil(
+          (new Date(k.bitis_tarihi as string).getTime() - new Date(k.baslangic_tarihi).getTime()) / 86400000
+        ));
+        return { marka: k.marka, model: k.model, kullanici_email: k.kullanici_email, gun, gelir: gun * k.gunluk_fiyat, tarih: k.bitis_tarihi as string };
+      })
+      .sort((a, b) => new Date(b.tarih).getTime() - new Date(a.tarih).getTime())
+      .slice(0, 10);
   }
 
   tarihFormatla(tarih?: string | null) {

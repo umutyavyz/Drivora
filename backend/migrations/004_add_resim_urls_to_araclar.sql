@@ -1,0 +1,1 @@
+ALTER TABLE araclar ADD COLUMN IF NOT EXISTS resim_urls TEXT[];
